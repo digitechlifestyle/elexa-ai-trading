@@ -84,6 +84,37 @@ export default function HomePage() {
             Read full disclaimer →
           </Link>
         </p>
+
+        {/* Social Share Buttons */}
+        <div className="flex justify-center gap-4 mt-8">
+          <a
+            href={`https://twitter.com/intent/tweet?text=Elexa AI Trading - Research AI agents for paper trading&url=https://elexa-ai-trading.vercel.app&hashtags=AI,Trading,Research`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+            title="Share on Twitter"
+          >
+            𝕏 Twitter
+          </a>
+          <a
+            href="https://www.linkedin.com/sharing/share-offsite/?url=https://elexa-ai-trading.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+            title="Share on LinkedIn"
+          >
+            💼 LinkedIn
+          </a>
+          <a
+            href={`https://www.facebook.com/sharer/sharer.php?u=https://elexa-ai-trading.vercel.app`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+            title="Share on Facebook"
+          >
+            f Facebook
+          </a>
+        </div>
       </section>
 
       {/* Features */}
