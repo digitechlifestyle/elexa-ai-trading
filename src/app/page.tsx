@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import InteractiveAgents from "@/components/InteractiveAgents";
 
 export const metadata: Metadata = {
   title: "Elexa AI Trading | AI-Powered Paper Trading Research Platform",
@@ -86,33 +87,76 @@ export default function HomePage() {
         </p>
 
         {/* Social Share Buttons */}
-        <div className="flex justify-center gap-4 mt-8">
+        <div className="flex flex-wrap justify-center gap-3 mt-8">
           <a
-            href={`https://twitter.com/intent/tweet?text=Elexa AI Trading - Research AI agents for paper trading&url=https://elexa-ai-trading.vercel.app&hashtags=AI,Trading,Research`}
+            href={`https://twitter.com/intent/tweet?text=Elexa AI Trading - AI agents for paper trading&url=https://elexa-ai-trading.vercel.app&hashtags=AI,Trading,Research`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
             title="Share on Twitter"
           >
-            𝕏 Twitter
+            𝕏
           </a>
           <a
             href="https://www.linkedin.com/sharing/share-offsite/?url=https://elexa-ai-trading.vercel.app"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
             title="Share on LinkedIn"
           >
-            💼 LinkedIn
+            💼
           </a>
           <a
             href={`https://www.facebook.com/sharer/sharer.php?u=https://elexa-ai-trading.vercel.app`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
             title="Share on Facebook"
           >
-            f Facebook
+            📘
+          </a>
+          <a
+            href={`https://www.instagram.com/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
+            title="Follow on Instagram"
+          >
+            📷
+          </a>
+          <a
+            href={`https://www.tiktok.com/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
+            title="Follow on TikTok"
+          >
+            🎵
+          </a>
+          <a
+            href={`https://www.pinterest.com/pin/create/button/?url=https://elexa-ai-trading.vercel.app&description=Elexa AI Trading`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
+            title="Share on Pinterest"
+          >
+            📌
+          </a>
+          <a
+            href={`https://reddit.com/submit?url=https://elexa-ai-trading.vercel.app&title=Elexa AI Trading`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
+            title="Share on Reddit"
+          >
+            🔴
+          </a>
+          <a
+            href={`mailto:?subject=Elexa AI Trading&body=Check out Elexa AI Trading - AI agents for paper trading: https://elexa-ai-trading.vercel.app`}
+            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
+            title="Share via Email"
+          >
+            ✉️
           </a>
         </div>
       </section>
@@ -144,32 +188,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Agent org chart */}
-      <section className="px-6 py-20 max-w-6xl mx-auto w-full">
-        <h2 className="text-3xl font-bold text-center mb-4">The Agent Team</h2>
-        <p className="text-center text-[var(--muted)] mb-12 max-w-xl mx-auto">
-          Every trade idea passes through multiple AI checkpoints. No single
-          agent has unilateral authority.
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {[
-            { name: "CEO Agent", role: "Delegates tasks, summarises board briefings", color: "indigo" },
-            { name: "Quant Agent", role: "Analyses signals, proposes trade ideas", color: "violet" },
-            { name: "Risk Agent", role: "Validates against stop-loss and position limits", color: "rose" },
-            { name: "Compliance Agent", role: "Flags regulated language and legal risks", color: "amber" },
-            { name: "SEO Agent", role: "Generates compliant blog and keyword content", color: "emerald" },
-            { name: "Support Agent", role: "Answers user questions about the platform", color: "sky" },
-          ].map((a) => (
-            <div
-              key={a.name}
-              className="border border-[var(--card-border)] rounded-xl p-5 bg-[var(--card)]"
-            >
-              <p className="font-semibold text-sm mb-1">{a.name}</p>
-              <p className="text-[var(--muted)] text-xs">{a.role}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Agent org chart — Interactive */}
+      <InteractiveAgents />
 
       {/* CTA */}
       <section className="px-6 py-20 bg-indigo-950 border-y border-indigo-900 text-center">
