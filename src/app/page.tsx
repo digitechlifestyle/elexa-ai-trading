@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Elexa AI Trading | AI-Powered Paper Trading Research Platform",
@@ -10,33 +11,33 @@ export const metadata: Metadata = {
 const features = [
   {
     icon: "🤖",
-    title: "Multi-Agent AI Analysis",
-    desc: "CEO, Quant, Risk, and Compliance agents analyse signals and validate every trade idea before execution.",
+    title: "6 AI Agents",
+    desc: "CEO, Quant, Risk, Compliance, SEO, and Support agents work together. Each decision is validated and logged.",
   },
   {
-    icon: "📄",
-    title: "Paper Trading Only",
-    desc: "All trades execute in Alpaca's simulated environment. No real money ever moves without explicit testing and approval.",
+    icon: "🪙",
+    title: "Stocks & Crypto",
+    desc: "Trade stocks via Alpaca. Trade crypto (BTC, XRP, SOL, top 100) via Kraken. Coming: Coinbase, Binance.",
   },
   {
-    icon: "🛡️",
-    title: "Built-in Risk Limits",
-    desc: "Hard stop-loss limits, max position sizes, and daily loss caps enforced server-side — agents cannot override them.",
+    icon: "⚡",
+    title: "Multi-Exchange",
+    desc: "Plug in your own API keys. We route trades to your choice of exchange. You control the connection.",
   },
   {
     icon: "📓",
     title: "Trade Journal",
-    desc: "Every AI decision is logged with full reasoning. Review what each agent recommended and why.",
+    desc: "Every AI decision is logged with full reasoning. Review agent recommendations and outcomes.",
   },
   {
-    icon: "📊",
-    title: "TradingView Signals",
-    desc: "Ingest market signals and run backtests via Alpaca's data feed. Paper-test strategies before considering live deployment.",
+    icon: "🛡️",
+    title: "Risk Management",
+    desc: "Hard stop-loss limits, max position sizes, daily loss caps. Enforced server-side — no override.",
   },
   {
-    icon: "🔒",
-    title: "Encrypted & Secure",
-    desc: "API keys stored encrypted. Role-based access. No hardcoded secrets. Full audit log of every agent action.",
+    icon: "🔐",
+    title: "Encrypted API Keys",
+    desc: "Your exchange credentials are stored encrypted. Full audit log of every trade and AI decision.",
   },
 ];
 

@@ -11,9 +11,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "https://elexaaitrading.com"
   ),
+  icons: {
+    icon: "/favicon.ico",
+  },
   openGraph: {
     siteName: "Elexa AI Trading",
     type: "website",
+    images: [{ url: "/elexa-logo.svg" }],
   },
   robots: { index: true, follow: true },
 };

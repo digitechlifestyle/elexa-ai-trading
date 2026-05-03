@@ -1,0 +1,43 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="url(#grad)" stroke-width="2" opacity="0.3" />
+
+  <!-- Central E symbol (modern, geometric) -->
+  <g transform="translate(100, 100)">
+    <!-- Left vertical bar -->
+    <rect x="-35" y="-40" width="8" height="80" fill="url(#grad)" rx="2" />
+
+    <!-- Top horizontal bar -->
+    <rect x="-35" y="-40" width="45" height="8" fill="url(#grad)" rx="2" />
+
+    <!-- Middle horizontal bar -->
+    <rect x="-35" y="-5" width="40" height="8" fill="url(#grad)" rx="2" />
+
+    <!-- Bottom horizontal bar -->
+    <rect x="-35" y="32" width="45" height="8" fill="url(#grad)" rx="2" />
+
+    <!-- Accent: small circle (AI element) -->
+    <circle cx="30" cy="-25" r="6" fill="url(#grad)" opacity="0.8" />
+  </g>
+
+  <!-- Company text (optional, can be removed) -->
+  <text
+    x="100"
+    y="175"
+    font-size="12"
+    font-weight="bold"
+    text-anchor="middle"
+    fill="url(#grad)"
+    letter-spacing="2"
+  >
+    ELEXA
+  </text>
+</svg>
