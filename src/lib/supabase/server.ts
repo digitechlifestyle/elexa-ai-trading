@@ -15,9 +15,17 @@ export async function createClient() {
           return cookieStore.getAll();
         },
         setAll(cookiesToSet: CookieToSet[]) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
+          // In Server Components, cookieStore.set() throws.
+          // Cookie refresh is handled by the proxy on every request,
+          // so swallow the error here. Route Handlers and Server Actions
+          // can still set cookies as normal.
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // Server Component: ignore — proxy refreshes session.
+          }
         },
       },
     }
@@ -36,9 +44,13 @@ export async function createAdminClient() {
           return cookieStore.getAll();
         },
         setAll(cookiesToSet: CookieToSet[]) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // Same: Server Component context.
+          }
         },
       },
     }

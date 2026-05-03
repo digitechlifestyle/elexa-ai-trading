@@ -7,10 +7,12 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
 
-  // TODO: Fix auth — for now use placeholder
-  // const { data: { user } } = await supabase.auth.getUser();
-  // if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const user = { id: "placeholder-user-id" };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await request.json().catch(() => null);
   if (

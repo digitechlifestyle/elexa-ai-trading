@@ -14,14 +14,11 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // TODO: Fix Supabase SSR auth — temporarily disabled for testing
-  // const supabase = await createClient();
-  // const {
-  //   data: { user },
-  // } = await supabase.auth.getUser();
-  // if (!user) redirect("/login");
-
-  const user = { email: "test@example.com" }; // Temp mock
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
   return (
     <div className="flex min-h-screen">
