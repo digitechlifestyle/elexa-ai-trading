@@ -61,6 +61,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 502 });
   }
 
+  // Map Alpaca status to our allowed values
+  const alpacaStatus = alpacaOrder.status ?? "pending";
+  const mappedStatus =
+    alpacaStatus === "filled" || alpacaStatus === "partially_filled" ? "filled" :
+    alpacaStatus === "pending" || alpacaStatus === "new" ? "pending" :
+    alpacaStatus === "cancelled" ? "cancelled" :
+    "rejected";
+
   // Log to database
   const { data: trade, error: dbError } = await supabase
     .from("trades")
@@ -72,7 +80,7 @@ export async function POST(request: NextRequest) {
       filled_price: alpacaOrder.filled_avg_price
         ? parseFloat(alpacaOrder.filled_avg_price)
         : null,
-      status: alpacaOrder.status ?? "pending",
+      status: mappedStatus,
       is_paper: true,
       alpaca_order_id: alpacaOrder.id,
     })
@@ -80,7 +88,11 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (dbError) {
-    return NextResponse.json({ error: "Failed to log trade" }, { status: 500 });
+    console.error("Trade insert error:", dbError);
+    return NextResponse.json(
+      { error: `Failed to log trade: ${dbError.message}` },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ trade, alpacaOrder }, { status: 201 });
