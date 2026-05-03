@@ -3,6 +3,7 @@ import { AgentBus, type AgentName } from "@/lib/agents/bus";
 import { ALL_AGENTS } from "@/lib/agents/registry";
 import { withApi } from "@/lib/observability/api-handler";
 import { log } from "@/lib/observability/logger";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
@@ -23,6 +24,21 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Rate limit: 20 agent invocations per 5 minutes per user
+  const rl = await checkRateLimit({
+    key: `agents:${user.id}`,
+    ...RATE_LIMITS.agents,
+  });
+  if (!rl.allowed) {
+    return NextResponse.json(
+      {
+        error: "Rate limit exceeded — too many agent invocations. Try again shortly.",
+        request_id: requestId,
+      },
+      { status: 429, headers: { "retry-after": "300" } }
+    );
   }
 
   const body = await request.json().catch(() => null);

@@ -4,6 +4,7 @@ import type { ExchangeName } from "@/lib/exchanges/factory";
 import { validateOrder, checkDailyLoss } from "@/lib/trading/risk-limits";
 import { withApi } from "@/lib/observability/api-handler";
 import { log } from "@/lib/observability/logger";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = withApi(async function POST(request: NextRequest, { requestId }) {
@@ -14,6 +15,21 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Rate limit: 10 trades per minute per user
+  const rl = await checkRateLimit({
+    key: `trading:${user.id}`,
+    ...RATE_LIMITS.trading,
+  });
+  if (!rl.allowed) {
+    return NextResponse.json(
+      {
+        error: "Rate limit exceeded — too many trades. Try again in a minute.",
+        request_id: requestId,
+      },
+      { status: 429, headers: { "retry-after": "60" } }
+    );
   }
 
   const body = await request.json().catch(() => null);
