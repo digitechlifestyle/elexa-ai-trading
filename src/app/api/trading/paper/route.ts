@@ -2,9 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { createExchange } from "@/lib/exchanges/factory";
 import type { ExchangeName } from "@/lib/exchanges/factory";
 import { validateOrder, checkDailyLoss } from "@/lib/trading/risk-limits";
+import { withApi } from "@/lib/observability/api-handler";
+import { log } from "@/lib/observability/logger";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export const POST = withApi(async function POST(request: NextRequest, { requestId }) {
   const supabase = await createClient();
 
   const {
@@ -124,12 +126,25 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (dbError) {
-    console.error("Trade insert error:", dbError);
+    log.error("trade.insert_failed", {
+      request_id: requestId,
+      user_id: user.id,
+      message: dbError.message,
+    });
     return NextResponse.json(
       { error: `Failed to log trade: ${dbError.message}` },
       { status: 500 }
     );
   }
 
+  log.info("trade.placed", {
+    request_id: requestId,
+    user_id: user.id,
+    symbol,
+    side,
+    qty,
+    exchange,
+  });
+
   return NextResponse.json({ trade, order }, { status: 201 });
-}
+});

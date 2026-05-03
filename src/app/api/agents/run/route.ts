@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { AgentBus, type AgentName } from "@/lib/agents/bus";
 import { ALL_AGENTS } from "@/lib/agents/registry";
+import { withApi } from "@/lib/observability/api-handler";
+import { log } from "@/lib/observability/logger";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
@@ -13,7 +15,7 @@ const VALID_AGENTS: AgentName[] = [
   "support",
 ];
 
-export async function POST(request: NextRequest) {
+export const POST = withApi(async function POST(request: NextRequest, { requestId }) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -84,9 +86,21 @@ export async function POST(request: NextRequest) {
       output = result.output;
     }
     status = "completed";
+    log.info("agent.run.completed", {
+      request_id: requestId,
+      user_id: user.id,
+      agent,
+      correlation_id: correlationId,
+    });
   } catch (err) {
     output = err instanceof Error ? err.message : "Agent failed";
     status = "failed";
+    log.error("agent.run.failed", {
+      request_id: requestId,
+      user_id: user.id,
+      agent,
+      message: output,
+    });
   }
 
   // Update run record
@@ -104,4 +118,4 @@ export async function POST(request: NextRequest) {
     },
     { status: 200 }
   );
-}
+});
