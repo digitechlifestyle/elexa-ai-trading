@@ -67,7 +67,10 @@ export default function RootLayout({
               financial regulatory body. Consult a licensed financial advisor
               before making any investment decisions.
             </p>
-            <div className="flex gap-4 pt-2">
+            <div className="flex flex-wrap gap-4 pt-2">
+              <a href="/legal" className="hover:text-white underline font-semibold text-amber-300">
+                Legal &amp; Liability
+              </a>
               <a href="/disclaimer" className="hover:text-white underline">
                 Full Risk Disclaimer
               </a>
