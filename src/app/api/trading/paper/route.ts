@@ -103,16 +103,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 502 });
   }
 
-  // Log to database
-  const alpacaStatus = order.status ?? "pending";
-  const mappedStatus =
-    alpacaStatus === "filled" || alpacaStatus === "partially_filled"
-      ? "filled"
-      : alpacaStatus === "pending" || alpacaStatus === "new"
-      ? "pending"
-      : alpacaStatus === "cancelled"
-      ? "cancelled"
-      : "rejected";
+  // Log to database (status already normalized by exchange adapter)
+  const mappedStatus = order.status;
 
   const { data: trade, error: dbError } = await supabase
     .from("trades")

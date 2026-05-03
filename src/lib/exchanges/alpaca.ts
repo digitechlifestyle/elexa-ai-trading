@@ -72,7 +72,7 @@ export class AlpacaExchange implements IExchange {
       symbol: data.symbol,
       qty: parseFloat(data.qty),
       side: data.side,
-      status: data.status ?? "pending",
+      status: this.normalizeStatus(data.status),
       filled_price: data.filled_avg_price ? parseFloat(data.filled_avg_price) : null,
       created_at: data.created_at,
     };
@@ -86,7 +86,7 @@ export class AlpacaExchange implements IExchange {
       symbol: o.symbol,
       qty: parseFloat(o.qty),
       side: o.side,
-      status: o.status ?? "pending",
+      status: this.normalizeStatus(o.status),
       filled_price: o.filled_avg_price ? parseFloat(o.filled_avg_price) : null,
       created_at: o.created_at,
     }));
@@ -98,6 +98,14 @@ export class AlpacaExchange implements IExchange {
 
   supportedAssetTypes(): AssetType[] {
     return ["stock"];
+  }
+
+  private normalizeStatus(alpacaStatus: string): "pending" | "filled" | "cancelled" | "rejected" {
+    if (!alpacaStatus) return "pending";
+    if (alpacaStatus === "filled" || alpacaStatus === "partially_filled") return "filled";
+    if (alpacaStatus === "new" || alpacaStatus === "pending") return "pending";
+    if (alpacaStatus === "cancelled" || alpacaStatus === "expired") return "cancelled";
+    return "rejected";
   }
 
   // Helper
