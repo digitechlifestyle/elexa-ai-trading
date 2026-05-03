@@ -1,7 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { createExchange } from "@/lib/exchanges/factory";
 import type { ExchangeName } from "@/lib/exchanges/factory";
-import { validateOrder, checkDailyLoss } from "@/lib/trading/risk-limits";
+import {
+  validateOrder,
+  checkDailyLoss,
+  checkOpenPositions,
+} from "@/lib/trading/risk-limits";
 import { withApi } from "@/lib/observability/api-handler";
 import { log } from "@/lib/observability/logger";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
@@ -38,10 +42,15 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     typeof body.symbol !== "string" ||
     typeof body.qty !== "number" ||
     !["buy", "sell"].includes(body.side) ||
-    !body.exchange
+    !body.exchange ||
+    typeof body.exchange !== "string"
   ) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
+
+  // Server-side enforcement: this route is paper-only.
+  // Ignore any client-supplied "live" flag — paper-only is hardcoded below
+  // (is_paper: true) and the route name is /trading/paper.
 
   const { symbol, qty, side, exchange } = body as {
     symbol: string;
@@ -49,6 +58,31 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     side: "buy" | "sell";
     exchange: ExchangeName;
   };
+
+  // Pre-validate inputs before hitting any external services.
+  // (Full validation runs again after price fetch — this is the cheap pre-check.)
+  if (!Number.isFinite(qty) || qty <= 0 || qty > 1_000_000) {
+    return NextResponse.json(
+      { error: "Invalid quantity" },
+      { status: 400 }
+    );
+  }
+
+  // Open position check
+  const { count: openCount } = await supabase
+    .from("trades")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("status", "filled")
+    .eq("is_paper", true);
+
+  const positionsCheck = checkOpenPositions(openCount ?? 0);
+  if (!positionsCheck.allowed) {
+    return NextResponse.json(
+      { error: positionsCheck.reason, code: positionsCheck.code },
+      { status: 422 }
+    );
+  }
 
   // Check daily loss limit
   const today = new Date().toISOString().split("T")[0];
@@ -66,7 +100,10 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
 
   const lossCheck = checkDailyLoss(dailyPnl);
   if (!lossCheck.allowed) {
-    return NextResponse.json({ error: lossCheck.reason }, { status: 429 });
+    return NextResponse.json(
+      { error: lossCheck.reason, code: lossCheck.code },
+      { status: 429 }
+    );
   }
 
   // Create exchange adapter
@@ -108,10 +145,13 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     );
   }
 
-  // Validate order against risk limits
+  // Validate order against risk limits (full validation with real price)
   const validation = validateOrder(symbol, qty, estimatedPrice);
   if (!validation.valid) {
-    return NextResponse.json({ error: validation.reason }, { status: 422 });
+    return NextResponse.json(
+      { error: validation.reason, code: validation.code },
+      { status: 422 }
+    );
   }
 
   // Place paper order
