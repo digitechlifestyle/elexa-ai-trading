@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import InteractiveAgents from "@/components/InteractiveAgents";
+import { features as featureData } from "@/lib/features-data";
 
 export const metadata: Metadata = {
   title: "Elexa AI Trading | AI-Powered Paper Trading Research Platform",
@@ -172,17 +173,24 @@ export default function HomePage() {
             risk limits they cannot override.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className="bg-[var(--background)] border border-[var(--card-border)] rounded-xl p-6 hover:border-indigo-700 transition-colors"
+            {featureData.map((f) => (
+              <Link
+                key={f.slug}
+                href={`/features/${f.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block bg-[var(--background)] border border-[var(--card-border)] rounded-xl p-6 hover:border-indigo-600 transition-all hover:scale-[1.02]"
               >
                 <div className="text-3xl mb-3">{f.icon}</div>
                 <h3 className="font-semibold text-lg mb-2">{f.title}</h3>
-                <p className="text-[var(--muted)] text-sm leading-relaxed">
-                  {f.desc}
+                <p className="text-indigo-400 text-xs mb-2">{f.tagline}</p>
+                <p className="text-[var(--muted)] text-sm leading-relaxed mb-3">
+                  {f.shortDesc}
                 </p>
-              </div>
+                <p className="text-indigo-400 text-xs font-medium">
+                  Read full guide →
+                </p>
+              </Link>
             ))}
           </div>
         </div>
