@@ -1,23 +1,23 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sign In",
+  title: "Reset Password",
   robots: { index: false, follow: false },
 };
 
-export default async function LoginPage({
+export default async function ResetPasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; message?: string; redirectTo?: string }>;
+  searchParams: Promise<{ error?: string; message?: string }>;
 }) {
   const { error, message } = await searchParams;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-8">
-        <h1 className="text-2xl font-bold mb-2">Sign in</h1>
+        <h1 className="text-2xl font-bold mb-2">Set a new password</h1>
         <p className="text-[var(--muted)] text-sm mb-8">
-          Access your paper trading research dashboard.
+          Enter your new password below. Must be at least 8 characters.
         </p>
 
         {error && (
@@ -31,32 +31,33 @@ export default async function LoginPage({
           </div>
         )}
 
-        {/* Auth UI — wire to Supabase Auth UI or custom form */}
-        <form action="/api/auth/login" method="POST" className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1.5" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
-              placeholder="you@example.com"
-            />
-          </div>
+        <form action="/api/auth/reset-password" method="POST" className="space-y-4">
           <div>
             <label className="block text-sm mb-1.5" htmlFor="password">
-              Password
+              New password
             </label>
             <input
               id="password"
               name="password"
               type="password"
               required
-              autoComplete="current-password"
+              minLength={8}
+              autoComplete="new-password"
+              className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
+              placeholder="••••••••"
+            />
+          </div>
+          <div>
+            <label className="block text-sm mb-1.5" htmlFor="confirm">
+              Confirm new password
+            </label>
+            <input
+              id="confirm"
+              name="confirm"
+              type="password"
+              required
+              minLength={8}
+              autoComplete="new-password"
               className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
               placeholder="••••••••"
             />
@@ -65,22 +66,9 @@ export default async function LoginPage({
             type="submit"
             className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-lg font-semibold text-sm transition-colors"
           >
-            Sign in
+            Set new password
           </button>
         </form>
-
-        <p className="text-center text-xs mt-4">
-          <a href="/forgot-password" className="text-indigo-400 hover:underline">
-            Forgot password?
-          </a>
-        </p>
-
-        <p className="text-center text-xs text-[var(--muted)] mt-6">
-          Don&apos;t have an account?{" "}
-          <a href="/signup" className="text-indigo-400 hover:underline">
-            Sign up
-          </a>
-        </p>
       </div>
     </div>
   );
