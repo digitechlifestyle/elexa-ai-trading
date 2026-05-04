@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import InteractiveAgents from "@/components/InteractiveAgents";
 import { features as featureData } from "@/lib/features-data";
 
@@ -43,7 +44,21 @@ const features = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string; next?: string }>;
+}) {
+  // Catch stray Supabase auth codes that land on the homepage and route them
+  // through the proper auth callback handler.
+  const { code, next } = await searchParams;
+  if (code) {
+    const target = `/auth/callback?code=${encodeURIComponent(code)}${
+      next ? `&next=${encodeURIComponent(next)}` : "&next=/reset-password"
+    }`;
+    redirect(target);
+  }
+
   return (
     <div className="flex flex-col">
       {/* Hero */}

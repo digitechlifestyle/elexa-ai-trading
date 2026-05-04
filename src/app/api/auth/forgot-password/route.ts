@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${appUrl}/reset-password`,
+    redirectTo: `${appUrl}/auth/callback?next=/reset-password`,
   });
 
   // Always show success to prevent email enumeration attacks
