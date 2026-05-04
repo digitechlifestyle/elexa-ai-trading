@@ -17,10 +17,14 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
+    // Log the actual error so we can see it in Vercel logs / pass it back
+    console.error("Auth callback exchange error:", error.message, error);
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent(error.message)}`
+    );
   }
 
-  // No code or exchange failed — send back to login with an error
   return NextResponse.redirect(
-    `${origin}/login?error=Could%20not%20verify%20link.%20Please%20request%20a%20new%20one.`
+    `${origin}/login?error=No%20code%20in%20link.%20Please%20request%20a%20new%20one.`
   );
 }
