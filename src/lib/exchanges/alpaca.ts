@@ -51,11 +51,20 @@ export class AlpacaExchange implements IExchange {
   }
 
   async getAssetPrice(symbol: string): Promise<number> {
-    const res = await this.request(
-      "GET",
-      `/v2/stocks/${symbol.toUpperCase()}/trades/latest`
-    );
-    return parseFloat(res.trade.p);
+    // Stock data lives on data.alpaca.markets, not the trading paper-api host.
+    const url = `https://data.alpaca.markets/v2/stocks/${symbol.toUpperCase()}/trades/latest`;
+    const res = await fetch(url, {
+      headers: {
+        "APCA-API-KEY-ID": this.config.api_key,
+        "APCA-API-SECRET-KEY": this.config.api_secret,
+      },
+    });
+    if (!res.ok) {
+      const err = await res.text().catch(() => "");
+      throw new Error(`Alpaca data error: ${res.status} ${err.slice(0, 200)}`);
+    }
+    const data = await res.json();
+    return parseFloat(data.trade.p);
   }
 
   async placeOrder(symbol: string, qty: number, side: "buy" | "sell"): Promise<Order> {
