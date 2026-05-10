@@ -90,15 +90,21 @@ export default function PortfolioPage() {
           <h2 className="font-semibold mb-5">Place Paper Order</h2>
           <form onSubmit={submitOrder} className="space-y-4">
             <div>
-              <label className="block text-sm mb-1.5">Symbol (e.g., AAPL, BTC, XRP)</label>
+              <label className="block text-sm mb-1.5">
+                Symbol — stocks, ETFs, commodities, crypto
+              </label>
               <input
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value.toUpperCase())}
                 required
-                placeholder="AAPL"
-                maxLength={10}
+                placeholder="AAPL, GLD, USO, BTC, ETH, SOL, DOGE..."
+                maxLength={12}
                 className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
               />
+              <p className="text-xs text-[var(--muted)] mt-1.5">
+                Stocks: AAPL, MSFT, TSLA, NVDA · Gold: GLD · Silver: SLV · Oil:
+                USO · Crypto: BTC, ETH, XRP, SOL, DOGE, SHIB, PEPE
+              </p>
             </div>
             <div>
               <label className="block text-sm mb-1.5">Quantity</label>
@@ -107,11 +113,15 @@ export default function PortfolioPage() {
                 value={qty}
                 onChange={(e) => setQty(e.target.value)}
                 required
-                min={1}
-                step={1}
-                placeholder="10"
+                min={0.000001}
+                step="any"
+                placeholder="10 (stocks) or 0.01 (crypto)"
                 className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
               />
+              <p className="text-xs text-[var(--muted)] mt-1.5">
+                Stocks: whole or fractional shares. Crypto: any amount, e.g.
+                0.001 BTC.
+              </p>
             </div>
             <div className="flex gap-3">
               <button

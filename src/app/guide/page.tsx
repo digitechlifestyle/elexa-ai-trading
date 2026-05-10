@@ -90,9 +90,16 @@ export default function GuidePage() {
         </h2>
         <ol className="space-y-3 list-decimal list-inside">
           <li>From the dashboard sidebar, click <strong>Portfolio</strong>.</li>
-          <li>Choose an exchange. <strong>Alpaca</strong> for stocks (AAPL, MSFT, TSLA). <strong>Kraken</strong> for crypto (BTC, ETH, SOL).</li>
-          <li>Type a symbol — for example, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">AAPL</code>.</li>
-          <li>Enter a quantity — for stocks try <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">1</code>. For crypto try <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">0.01</code>.</li>
+          <li>Choose an exchange. <strong>Alpaca</strong> handles stocks, ETFs, commodities, and crypto.</li>
+          <li>
+            Type a symbol. Examples:
+            <ul className="list-disc list-inside ml-4 mt-2 space-y-1 text-[var(--muted)] text-sm">
+              <li>Stocks: <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">AAPL</code>, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">MSFT</code>, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">TSLA</code>, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">NVDA</code></li>
+              <li>Commodities: <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">GLD</code> (gold), <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">SLV</code> (silver), <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">USO</code> (oil), <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">UNG</code> (natural gas)</li>
+              <li>Crypto: <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">BTC</code>, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">ETH</code>, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">XRP</code>, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">SOL</code>, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">DOGE</code>, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">SHIB</code>, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">PEPE</code>, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">USDT</code>, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">USDC</code></li>
+            </ul>
+          </li>
+          <li>Enter a quantity. Stocks: <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">1</code>. Crypto: <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">0.001</code> for BTC, <code className="bg-[var(--card)] px-1.5 py-0.5 rounded">100000</code> for SHIB.</li>
           <li>Choose <strong>Buy</strong> or <strong>Sell</strong>.</li>
           <li>Click <strong>Submit Paper Order</strong>.</li>
           <li>Look for the green confirmation. The trade appears in your Journal.</li>
