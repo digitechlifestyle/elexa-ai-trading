@@ -109,11 +109,36 @@ export class AlpacaExchange implements IExchange {
     return ["stock"];
   }
 
-  private normalizeStatus(alpacaStatus: string): "pending" | "filled" | "cancelled" | "rejected" {
+  private normalizeStatus(
+    alpacaStatus: string
+  ): "pending" | "filled" | "cancelled" | "rejected" {
     if (!alpacaStatus) return "pending";
-    if (alpacaStatus === "filled" || alpacaStatus === "partially_filled") return "filled";
-    if (alpacaStatus === "new" || alpacaStatus === "pending") return "pending";
-    if (alpacaStatus === "cancelled" || alpacaStatus === "expired") return "cancelled";
+    const s = alpacaStatus.toLowerCase();
+    if (s === "filled" || s === "partially_filled") return "filled";
+    if (
+      s === "new" ||
+      s === "pending" ||
+      s === "accepted" ||
+      s === "pending_new" ||
+      s === "accepted_for_bidding" ||
+      s === "calculated" ||
+      s === "held" ||
+      s === "pending_cancel" ||
+      s === "pending_replace"
+    ) {
+      return "pending";
+    }
+    if (
+      s === "cancelled" ||
+      s === "canceled" ||
+      s === "expired" ||
+      s === "done_for_day" ||
+      s === "replaced" ||
+      s === "stopped" ||
+      s === "suspended"
+    ) {
+      return "cancelled";
+    }
     return "rejected";
   }
 
