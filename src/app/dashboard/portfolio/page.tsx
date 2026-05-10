@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import PortfolioForm from "./PortfolioForm";
+import PositionsTable from "./PositionsTable";
 
 export default async function PortfolioPage() {
   const supabase = await createClient();
@@ -49,48 +50,10 @@ export default async function PortfolioPage() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-semibold">Open Positions</h2>
           <span className="text-xs text-[var(--muted)]">
-            {positions.length} {positions.length === 1 ? "position" : "positions"}
+            {positions.length} {positions.length === 1 ? "position" : "positions"} · live prices
           </span>
         </div>
-        {positions.length === 0 ? (
-          <p className="text-sm text-[var(--muted)]">
-            No open positions. Place a buy order to open one.
-          </p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="text-xs text-[var(--muted)] border-b border-[var(--card-border)]">
-              <tr>
-                <th className="text-left py-2 px-2">Symbol</th>
-                <th className="text-right py-2 px-2">Qty (net)</th>
-                <th className="text-right py-2 px-2">Avg cost</th>
-                <th className="text-right py-2 px-2">Cost basis</th>
-                <th className="text-right py-2 px-2">Trades</th>
-              </tr>
-            </thead>
-            <tbody>
-              {positions.map((p) => (
-                <tr
-                  key={p.symbol}
-                  className="border-b border-[var(--card-border)] last:border-0"
-                >
-                  <td className="py-2 px-2 font-medium">{p.symbol}</td>
-                  <td className="py-2 px-2 text-right">
-                    {p.qty.toFixed(p.qty % 1 === 0 ? 0 : 4)}
-                  </td>
-                  <td className="py-2 px-2 text-right">
-                    ${Math.abs(p.qty) > 0 ? (Math.abs(p.cost_basis) / Math.abs(p.qty)).toFixed(2) : "—"}
-                  </td>
-                  <td className="py-2 px-2 text-right">
-                    ${Math.abs(p.cost_basis).toFixed(2)}
-                  </td>
-                  <td className="py-2 px-2 text-right text-[var(--muted)]">
-                    {p.trades}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <PositionsTable positions={positions} />
       </div>
 
       {/* Recent trades */}
