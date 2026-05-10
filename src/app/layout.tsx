@@ -68,6 +68,9 @@ export default function RootLayout({
               before making any investment decisions.
             </p>
             <div className="flex flex-wrap gap-4 pt-2">
+              <a href="/guide" className="hover:text-white underline">
+                User Guide
+              </a>
               <a href="/legal" className="hover:text-white underline font-semibold text-amber-300">
                 Legal &amp; Liability
               </a>

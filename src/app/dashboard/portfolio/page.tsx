@@ -1,163 +1,149 @@
-"use client";
+import { createClient } from "@/lib/supabase/server";
+import PortfolioForm from "./PortfolioForm";
 
-import { useState } from "react";
-import { getAvailableExchanges } from "@/lib/exchanges/factory";
+export default async function PortfolioPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-const EXCHANGES = getAvailableExchanges();
+  // Recent trades for this user
+  const { data: recent } = await supabase
+    .from("trades")
+    .select("id, symbol, side, qty, filled_price, status, is_paper, created_at")
+    .eq("user_id", user!.id)
+    .order("created_at", { ascending: false })
+    .limit(20);
 
-export default function PortfolioPage() {
-  const [exchange, setExchange] = useState<string>("alpaca");
-  const [symbol, setSymbol] = useState("");
-  const [qty, setQty] = useState("");
-  const [side, setSide] = useState<"buy" | "sell">("buy");
-  const [status, setStatus] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const trades = recent ?? [];
 
-  const selectedExchange = EXCHANGES.find((e) => e.id === exchange);
-
-  async function submitOrder(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setStatus(null);
-
-    try {
-      const res = await fetch("/api/trading/paper", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          exchange,
-          symbol,
-          qty: Number(qty),
-          side,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setStatus(`Error: ${data.error}`);
-      } else {
-        setStatus(
-          `✓ Paper ${side} order submitted for ${qty} × ${symbol.toUpperCase()} on ${selectedExchange?.name}`
-        );
-        setSymbol("");
-        setQty("");
-      }
-    } catch {
-      setStatus("Network error. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  // Build a "positions" view by netting buys and sells per symbol
+  const positionsMap = new Map<
+    string,
+    { symbol: string; qty: number; cost_basis: number; trades: number }
+  >();
+  for (const t of trades) {
+    if (t.status !== "filled" || t.filled_price == null) continue;
+    const cur = positionsMap.get(t.symbol) ?? {
+      symbol: t.symbol,
+      qty: 0,
+      cost_basis: 0,
+      trades: 0,
+    };
+    const sign = t.side === "buy" ? 1 : -1;
+    cur.qty += sign * Number(t.qty);
+    cur.cost_basis += sign * Number(t.qty) * Number(t.filled_price);
+    cur.trades += 1;
+    positionsMap.set(t.symbol, cur);
   }
+  const positions = Array.from(positionsMap.values()).filter(
+    (p) => Math.abs(p.qty) > 1e-9
+  );
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold mb-1">Portfolio</h1>
-        <p className="text-[var(--muted)] text-sm">
-          Place simulated paper trades across multiple exchanges and assets.
-        </p>
+      <PortfolioForm />
+
+      {/* Positions */}
+      <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-semibold">Open Positions</h2>
+          <span className="text-xs text-[var(--muted)]">
+            {positions.length} {positions.length === 1 ? "position" : "positions"}
+          </span>
+        </div>
+        {positions.length === 0 ? (
+          <p className="text-sm text-[var(--muted)]">
+            No open positions. Place a buy order to open one.
+          </p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="text-xs text-[var(--muted)] border-b border-[var(--card-border)]">
+              <tr>
+                <th className="text-left py-2 px-2">Symbol</th>
+                <th className="text-right py-2 px-2">Qty (net)</th>
+                <th className="text-right py-2 px-2">Avg cost</th>
+                <th className="text-right py-2 px-2">Cost basis</th>
+                <th className="text-right py-2 px-2">Trades</th>
+              </tr>
+            </thead>
+            <tbody>
+              {positions.map((p) => (
+                <tr
+                  key={p.symbol}
+                  className="border-b border-[var(--card-border)] last:border-0"
+                >
+                  <td className="py-2 px-2 font-medium">{p.symbol}</td>
+                  <td className="py-2 px-2 text-right">
+                    {p.qty.toFixed(p.qty % 1 === 0 ? 0 : 4)}
+                  </td>
+                  <td className="py-2 px-2 text-right">
+                    ${Math.abs(p.qty) > 0 ? (Math.abs(p.cost_basis) / Math.abs(p.qty)).toFixed(2) : "—"}
+                  </td>
+                  <td className="py-2 px-2 text-right">
+                    ${Math.abs(p.cost_basis).toFixed(2)}
+                  </td>
+                  <td className="py-2 px-2 text-right text-[var(--muted)]">
+                    {p.trades}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
-      <div className="bg-amber-950 border border-amber-800 rounded-xl px-5 py-3 text-amber-300 text-sm">
-        <strong>Paper Trading Only.</strong> All orders are executed in simulated environments. No real capital is at risk.
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Exchange selector */}
-        <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl p-6">
-          <h2 className="font-semibold mb-4">Select Exchange</h2>
-          <div className="space-y-2">
-            {EXCHANGES.map((ex) => (
-              <label key={ex.id} className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-[var(--background)] transition-colors">
-                <input
-                  type="radio"
-                  name="exchange"
-                  value={ex.id}
-                  checked={exchange === ex.id}
-                  onChange={(e) => setExchange(e.target.value)}
-                  className="w-4 h-4"
-                />
-                <div>
-                  <p className="font-medium text-sm">{ex.name}</p>
-                  <p className="text-xs text-[var(--muted)]">{ex.assets.join(", ")}</p>
-                </div>
-              </label>
-            ))}
-          </div>
+      {/* Recent trades */}
+      <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-semibold">Recent Trades</h2>
+          <span className="text-xs text-[var(--muted)]">last 20</span>
         </div>
-
-        {/* Trade form */}
-        <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl p-6">
-          <h2 className="font-semibold mb-5">Place Paper Order</h2>
-          <form onSubmit={submitOrder} className="space-y-4">
-            <div>
-              <label className="block text-sm mb-1.5">Symbol (e.g., AAPL, BTC, XRP)</label>
-              <input
-                value={symbol}
-                onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                required
-                placeholder="AAPL"
-                maxLength={10}
-                className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
-              />
-            </div>
-            <div>
-              <label className="block text-sm mb-1.5">Quantity</label>
-              <input
-                type="number"
-                value={qty}
-                onChange={(e) => setQty(e.target.value)}
-                required
-                min={1}
-                step={1}
-                placeholder="10"
-                className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
-              />
-            </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setSide("buy")}
-                className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition-colors ${
-                  side === "buy"
-                    ? "bg-green-700 border-green-600 text-white"
-                    : "border-[var(--card-border)] text-[var(--muted)]"
-                }`}
-              >
-                Buy
-              </button>
-              <button
-                type="button"
-                onClick={() => setSide("sell")}
-                className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition-colors ${
-                  side === "sell"
-                    ? "bg-red-800 border-red-700 text-white"
-                    : "border-[var(--card-border)] text-[var(--muted)]"
-                }`}
-              >
-                Sell
-              </button>
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white py-2.5 rounded-lg font-semibold text-sm transition-colors"
-            >
-              {loading ? "Submitting…" : "Submit Paper Order"}
-            </button>
-          </form>
-
-          {status && (
-            <div
-              className={`mt-4 p-3 rounded-lg text-sm ${
-                status.startsWith("Error")
-                  ? "bg-red-950 border border-red-800 text-red-300"
-                  : "bg-green-950 border border-green-800 text-green-300"
-              }`}
-            >
-              {status}
-            </div>
-          )}
-        </div>
+        {trades.length === 0 ? (
+          <p className="text-sm text-[var(--muted)]">No trades yet.</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="text-xs text-[var(--muted)] border-b border-[var(--card-border)]">
+              <tr>
+                <th className="text-left py-2 px-2">Date</th>
+                <th className="text-left py-2 px-2">Symbol</th>
+                <th className="text-left py-2 px-2">Side</th>
+                <th className="text-right py-2 px-2">Qty</th>
+                <th className="text-right py-2 px-2">Price</th>
+                <th className="text-left py-2 px-2">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trades.map((t) => (
+                <tr
+                  key={t.id}
+                  className="border-b border-[var(--card-border)] last:border-0"
+                >
+                  <td className="py-2 px-2 text-[var(--muted)] text-xs">
+                    {new Date(t.created_at).toLocaleString()}
+                  </td>
+                  <td className="py-2 px-2 font-medium">{t.symbol}</td>
+                  <td
+                    className={`py-2 px-2 ${
+                      t.side === "buy" ? "text-green-400" : "text-red-400"
+                    }`}
+                  >
+                    {t.side.toUpperCase()}
+                  </td>
+                  <td className="py-2 px-2 text-right">{t.qty}</td>
+                  <td className="py-2 px-2 text-right">
+                    {t.filled_price != null
+                      ? `$${Number(t.filled_price).toFixed(2)}`
+                      : "—"}
+                  </td>
+                  <td className="py-2 px-2 text-xs text-[var(--muted)]">
+                    {t.status}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import JournalForm from "./JournalForm";
 
 export default async function JournalPage() {
   const supabase = await createClient();
@@ -18,19 +19,23 @@ export default async function JournalPage() {
       <div>
         <h1 className="text-2xl font-bold mb-1">Trade Journal</h1>
         <p className="text-[var(--muted)] text-sm">
-          Log and review notes on your paper trading decisions.
+          Document decisions and reasoning. Append-only — entries can&apos;t be
+          edited or deleted.
         </p>
       </div>
+
+      <JournalForm />
 
       {!entries || entries.length === 0 ? (
         <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl p-8 text-center">
           <p className="text-[var(--muted)]">No journal entries yet.</p>
           <p className="text-sm text-[var(--muted)] mt-2">
-            Place paper trades and add notes to build your research record.
+            Use the form above to add your first entry.
           </p>
         </div>
       ) : (
         <div className="space-y-4">
+          <h2 className="font-semibold">Past Entries</h2>
           {entries.map((entry) => (
             <div
               key={entry.id}
@@ -39,7 +44,7 @@ export default async function JournalPage() {
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-semibold">{entry.title}</h3>
                 <span className="text-xs text-[var(--muted)]">
-                  {new Date(entry.created_at).toLocaleDateString()}
+                  {new Date(entry.created_at).toLocaleString()}
                 </span>
               </div>
               {entry.trades && (
@@ -48,7 +53,7 @@ export default async function JournalPage() {
                   {entry.trades.symbol}
                 </p>
               )}
-              <p className="text-sm text-[var(--muted)] whitespace-pre-wrap">
+              <p className="text-sm text-[var(--foreground)] whitespace-pre-wrap">
                 {entry.notes}
               </p>
             </div>
