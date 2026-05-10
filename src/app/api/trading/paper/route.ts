@@ -134,14 +134,22 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     );
   }
 
-  // Get current price
+  // Get current price. If exchange has no quote for this symbol, the user
+  // typed something invalid → 422 (unprocessable). Anything else (network,
+  // outage) → 502.
   let estimatedPrice = 0;
   try {
     estimatedPrice = await exchangeAdapter.getAssetPrice(symbol);
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "";
+    const userInputError =
+      /not found|invalid|no price data|no data|404|400/i.test(msg);
     return NextResponse.json(
-      { error: `Could not fetch price for ${symbol} on ${exchange}` },
-      { status: 502 }
+      {
+        error: `Could not fetch price for ${symbol} on ${exchange}`,
+        code: userInputError ? "SYMBOL_INVALID" : "PRICE_FETCH_FAILED",
+      },
+      { status: userInputError ? 422 : 502 }
     );
   }
 
