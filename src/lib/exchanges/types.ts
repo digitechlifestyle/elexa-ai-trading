@@ -46,6 +46,15 @@ export interface ExchangeConfig {
   use_sandbox?: boolean;
 }
 
+export type OrderType = "market" | "limit" | "stop" | "stop_limit";
+
+export interface PlaceOrderOpts {
+  type?: OrderType;
+  limit_price?: number;
+  stop_price?: number;
+  time_in_force?: "day" | "gtc";
+}
+
 export interface IExchange {
   name: string;
   config: ExchangeConfig;
@@ -59,7 +68,12 @@ export interface IExchange {
   getAssetPrice(symbol: string): Promise<number>;
 
   // Trading
-  placeOrder(symbol: string, qty: number, side: "buy" | "sell"): Promise<Order>;
+  placeOrder(
+    symbol: string,
+    qty: number,
+    side: "buy" | "sell",
+    opts?: PlaceOrderOpts
+  ): Promise<Order>;
   getOrders(status?: string): Promise<Order[]>;
   cancelOrder(orderId: string): Promise<void>;
 

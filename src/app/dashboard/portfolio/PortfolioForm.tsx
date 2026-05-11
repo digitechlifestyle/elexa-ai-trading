@@ -10,6 +10,11 @@ export default function PortfolioPage() {
   const [symbol, setSymbol] = useState("");
   const [qty, setQty] = useState("");
   const [side, setSide] = useState<"buy" | "sell">("buy");
+  const [orderType, setOrderType] = useState<"market" | "limit" | "stop" | "stop_limit">(
+    "market"
+  );
+  const [limitPrice, setLimitPrice] = useState("");
+  const [stopPrice, setStopPrice] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -21,15 +26,23 @@ export default function PortfolioPage() {
     setStatus(null);
 
     try {
+      const body: Record<string, unknown> = {
+        exchange,
+        symbol,
+        qty: Number(qty),
+        side,
+        order_type: orderType,
+      };
+      if (orderType === "limit" || orderType === "stop_limit") {
+        body.limit_price = Number(limitPrice);
+      }
+      if (orderType === "stop" || orderType === "stop_limit") {
+        body.stop_price = Number(stopPrice);
+      }
       const res = await fetch("/api/trading/paper", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          exchange,
-          symbol,
-          qty: Number(qty),
-          side,
-        }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -149,6 +162,61 @@ export default function PortfolioPage() {
                 Sell
               </button>
             </div>
+
+            {/* Order type */}
+            <div>
+              <label className="block text-sm mb-1.5">Order type</label>
+              <select
+                value={orderType}
+                onChange={(e) =>
+                  setOrderType(
+                    e.target.value as
+                      | "market"
+                      | "limit"
+                      | "stop"
+                      | "stop_limit"
+                  )
+                }
+                className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
+              >
+                <option value="market">Market (instant at current price)</option>
+                <option value="limit">Limit (fill only at price or better)</option>
+                <option value="stop">Stop (trigger market order at stop)</option>
+                <option value="stop_limit">Stop-Limit</option>
+              </select>
+            </div>
+
+            {(orderType === "limit" || orderType === "stop_limit") && (
+              <div>
+                <label className="block text-sm mb-1.5">Limit price (USD)</label>
+                <input
+                  type="number"
+                  value={limitPrice}
+                  onChange={(e) => setLimitPrice(e.target.value)}
+                  required
+                  min={0.0001}
+                  step="any"
+                  placeholder="e.g. 185.50"
+                  className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
+                />
+              </div>
+            )}
+
+            {(orderType === "stop" || orderType === "stop_limit") && (
+              <div>
+                <label className="block text-sm mb-1.5">Stop price (USD)</label>
+                <input
+                  type="number"
+                  value={stopPrice}
+                  onChange={(e) => setStopPrice(e.target.value)}
+                  required
+                  min={0.0001}
+                  step="any"
+                  placeholder="e.g. 180.00"
+                  className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
+                />
+              </div>
+            )}
             <button
               type="submit"
               disabled={loading}

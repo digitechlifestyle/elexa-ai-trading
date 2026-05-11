@@ -109,18 +109,37 @@ export class AlpacaExchange implements IExchange {
     return parseFloat(data.trade.p);
   }
 
-  async placeOrder(symbol: string, qty: number, side: "buy" | "sell"): Promise<Order> {
+  async placeOrder(
+    symbol: string,
+    qty: number,
+    side: "buy" | "sell",
+    opts?: import("./types").PlaceOrderOpts
+  ): Promise<Order> {
     const sym = normalizeSymbol(symbol);
     const isCrypto = isCryptoSymbol(symbol);
+    const orderType = opts?.type ?? "market";
 
-    const data = await this.request("POST", "/v2/orders", {
+    const payload: Record<string, string> = {
       symbol: sym,
       qty: qty.toString(),
       side,
-      type: "market",
-      // Crypto requires "gtc" (good till cancelled). Stocks use "day".
-      time_in_force: isCrypto ? "gtc" : "day",
-    });
+      type: orderType,
+      time_in_force: opts?.time_in_force ?? (isCrypto ? "gtc" : "day"),
+    };
+    if (orderType === "limit" || orderType === "stop_limit") {
+      if (opts?.limit_price == null) {
+        throw new Error("limit_price required for limit/stop_limit order");
+      }
+      payload.limit_price = String(opts.limit_price);
+    }
+    if (orderType === "stop" || orderType === "stop_limit") {
+      if (opts?.stop_price == null) {
+        throw new Error("stop_price required for stop/stop_limit order");
+      }
+      payload.stop_price = String(opts.stop_price);
+    }
+
+    const data = await this.request("POST", "/v2/orders", payload);
 
     return {
       id: data.id,

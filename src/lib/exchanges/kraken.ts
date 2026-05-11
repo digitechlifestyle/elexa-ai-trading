@@ -114,17 +114,30 @@ export class KrakenExchange implements IExchange {
   async placeOrder(
     symbol: string,
     qty: number,
-    side: "buy" | "sell"
+    side: "buy" | "sell",
+    opts?: import("./types").PlaceOrderOpts
   ): Promise<Order> {
-    // Paper-only: fetch real price, return synthetic filled order
-    const price = await this.getAssetPrice(symbol);
+    // Paper-only. For market order: fill at live price.
+    // For limit: fill at the limit price (assume favourable).
+    // For stop: fill at stop price (assume triggered).
+    const orderType = opts?.type ?? "market";
+    let fillPrice: number;
+    if (orderType === "limit" && opts?.limit_price != null) {
+      fillPrice = opts.limit_price;
+    } else if (orderType === "stop" && opts?.stop_price != null) {
+      fillPrice = opts.stop_price;
+    } else if (orderType === "stop_limit" && opts?.limit_price != null) {
+      fillPrice = opts.limit_price;
+    } else {
+      fillPrice = await this.getAssetPrice(symbol);
+    }
     return {
       id: `kraken-paper-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       symbol: symbol.toUpperCase(),
       qty,
       side,
       status: "filled",
-      filled_price: price,
+      filled_price: fillPrice,
       created_at: new Date().toISOString(),
     };
   }

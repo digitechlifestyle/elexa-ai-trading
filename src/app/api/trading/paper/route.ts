@@ -63,6 +63,32 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     exchange: ExchangeName;
   };
 
+  // Optional advanced order fields
+  const orderType = (body.order_type as string | undefined) ?? "market";
+  const limitPrice =
+    typeof body.limit_price === "number" ? body.limit_price : undefined;
+  const stopPrice =
+    typeof body.stop_price === "number" ? body.stop_price : undefined;
+  const validOrderTypes = ["market", "limit", "stop", "stop_limit"];
+  if (!validOrderTypes.includes(orderType)) {
+    return NextResponse.json(
+      { error: `Invalid order_type: ${orderType}` },
+      { status: 400 }
+    );
+  }
+  if ((orderType === "limit" || orderType === "stop_limit") && limitPrice == null) {
+    return NextResponse.json(
+      { error: "limit_price required for limit/stop_limit order" },
+      { status: 400 }
+    );
+  }
+  if ((orderType === "stop" || orderType === "stop_limit") && stopPrice == null) {
+    return NextResponse.json(
+      { error: "stop_price required for stop/stop_limit order" },
+      { status: 400 }
+    );
+  }
+
   // Pre-validate inputs before hitting any external services.
   // (Full validation runs again after price fetch — this is the cheap pre-check.)
   if (!Number.isFinite(qty) || qty <= 0 || qty > 1_000_000) {
@@ -178,7 +204,11 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
   // Place paper order
   let order;
   try {
-    order = await exchangeAdapter.placeOrder(symbol, qty, side);
+    order = await exchangeAdapter.placeOrder(symbol, qty, side, {
+      type: orderType as "market" | "limit" | "stop" | "stop_limit",
+      limit_price: limitPrice,
+      stop_price: stopPrice,
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Order failed";
     return NextResponse.json({ error: msg }, { status: 502 });
