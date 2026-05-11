@@ -113,14 +113,23 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
   // Create exchange adapter
   let exchangeAdapter;
   try {
-    // For now, use hardcoded credentials from env
-    // In production, user stores these securely in settings
-    const config = {
-      name: exchange,
-      api_key: process.env.ALPACA_API_KEY || "",
-      api_secret: process.env.ALPACA_API_SECRET || "",
-      base_url: process.env.ALPACA_BASE_URL || "https://paper-api.alpaca.markets",
-    };
+    // Per-exchange config. Kraken paper adapter needs no credentials.
+    const config =
+      exchange === "kraken"
+        ? {
+            name: exchange,
+            api_key: "",
+            api_secret: "",
+            base_url: "https://api.kraken.com",
+          }
+        : {
+            name: exchange,
+            api_key: process.env.ALPACA_API_KEY || "",
+            api_secret: process.env.ALPACA_API_SECRET || "",
+            base_url:
+              process.env.ALPACA_BASE_URL ||
+              "https://paper-api.alpaca.markets",
+          };
     exchangeAdapter = createExchange(exchange, config);
   } catch (err) {
     return NextResponse.json(

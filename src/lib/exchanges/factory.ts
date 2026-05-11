@@ -5,8 +5,8 @@ import { KrakenExchange } from "./kraken";
 export type ExchangeName = "alpaca" | "kraken" | "coinbase" | "binance";
 
 const EXCHANGES: { [key in ExchangeName]: { name: string; assets: string[] } } = {
-  alpaca: { name: "Alpaca", assets: ["stocks", "ETFs", "commodities (GLD, SLV, USO)", "crypto (BTC, ETH, XRP, SOL, etc.)"] },
-  kraken: { name: "Kraken", assets: ["crypto (extended set)"] },
+  alpaca: { name: "Alpaca (real paper API)", assets: ["stocks, ETFs, commodities (GLD, SLV, USO)", "crypto (BTC, ETH, XRP, SOL, DOGE, PEPE, SHIB...)"] },
+  kraken: { name: "Kraken (simulated)", assets: ["extended crypto (HBAR, XLM, DAI, ATOM, ALGO, ICP, NEAR, KAVA)"] },
   coinbase: { name: "Coinbase", assets: ["crypto"] },
   binance: { name: "Binance", assets: ["crypto", "futures"] },
 };

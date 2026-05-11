@@ -102,8 +102,10 @@ export default function PortfolioPage() {
                 className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
               />
               <p className="text-xs text-[var(--muted)] mt-1.5">
-                Stocks: AAPL, MSFT, TSLA, NVDA · Gold: GLD · Silver: SLV · Oil:
-                USO · Crypto: BTC, ETH, XRP, SOL, DOGE, SHIB, PEPE
+                Alpaca: stocks (AAPL, MSFT, TSLA) · commodities (GLD, SLV,
+                USO) · crypto (BTC, ETH, XRP, SOL, DOGE, SHIB, PEPE).
+                Kraken (simulated): HBAR, XLM, DAI, ATOM, ALGO, ICP, NEAR,
+                KAVA.
               </p>
             </div>
             <div>

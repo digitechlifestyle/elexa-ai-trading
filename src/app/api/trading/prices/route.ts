@@ -29,12 +29,22 @@ export const POST = withApi(async function POST(request: NextRequest) {
     .filter((s: unknown): s is string => typeof s === "string")
     .slice(0, 50); // cap
 
-  const config = {
-    name: body.exchange,
-    api_key: process.env.ALPACA_API_KEY || "",
-    api_secret: process.env.ALPACA_API_SECRET || "",
-    base_url: process.env.ALPACA_BASE_URL || "https://paper-api.alpaca.markets",
-  };
+  const config =
+    body.exchange === "kraken"
+      ? {
+          name: body.exchange,
+          api_key: "",
+          api_secret: "",
+          base_url: "https://api.kraken.com",
+        }
+      : {
+          name: body.exchange,
+          api_key: process.env.ALPACA_API_KEY || "",
+          api_secret: process.env.ALPACA_API_SECRET || "",
+          base_url:
+            process.env.ALPACA_BASE_URL ||
+            "https://paper-api.alpaca.markets",
+        };
 
   let adapter;
   try {
