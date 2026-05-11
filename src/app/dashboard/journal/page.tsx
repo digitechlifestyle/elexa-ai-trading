@@ -16,12 +16,21 @@ export default async function JournalPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold mb-1">Trade Journal</h1>
-        <p className="text-[var(--muted)] text-sm">
-          Document decisions and reasoning. Append-only — entries can&apos;t be
-          edited or deleted.
-        </p>
+      <div className="flex justify-between items-start gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold mb-1">Trade Journal</h1>
+          <p className="text-[var(--muted)] text-sm">
+            Document decisions and reasoning. Append-only — entries can&apos;t
+            be edited or deleted.
+          </p>
+        </div>
+        <a
+          href="/api/trades/export"
+          className="text-sm bg-[var(--card)] border border-[var(--card-border)] hover:border-indigo-600 px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
+          download
+        >
+          ⬇ Export trades CSV
+        </a>
       </div>
 
       <JournalForm />
