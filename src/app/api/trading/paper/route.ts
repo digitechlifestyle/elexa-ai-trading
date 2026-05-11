@@ -6,6 +6,7 @@ import {
   checkDailyLoss,
   checkOpenPositions,
 } from "@/lib/trading/risk-limits";
+import { getRiskLimitsForUser } from "@/lib/trading/user-limits";
 import { withApi } from "@/lib/observability/api-handler";
 import { log } from "@/lib/observability/logger";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
@@ -20,6 +21,9 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Resolve user-specific risk limits (or defaults)
+  const limits = getRiskLimitsForUser(user);
 
   // Rate limit: 10 trades per minute per user
   const rl = await checkRateLimit({
@@ -76,7 +80,7 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     .eq("status", "filled")
     .eq("is_paper", true);
 
-  const positionsCheck = checkOpenPositions(openCount ?? 0);
+  const positionsCheck = checkOpenPositions(openCount ?? 0, limits);
   if (!positionsCheck.allowed) {
     return NextResponse.json(
       { error: positionsCheck.reason, code: positionsCheck.code },
@@ -98,7 +102,7 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     return acc + (t.side === "sell" ? val : -val);
   }, 0);
 
-  const lossCheck = checkDailyLoss(dailyPnl);
+  const lossCheck = checkDailyLoss(dailyPnl, limits);
   if (!lossCheck.allowed) {
     return NextResponse.json(
       { error: lossCheck.reason, code: lossCheck.code },
@@ -154,7 +158,7 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
   }
 
   // Validate order against risk limits (full validation with real price)
-  const validation = validateOrder(symbol, qty, estimatedPrice);
+  const validation = validateOrder(symbol, qty, estimatedPrice, limits);
   if (!validation.valid) {
     return NextResponse.json(
       { error: validation.reason, code: validation.code },
