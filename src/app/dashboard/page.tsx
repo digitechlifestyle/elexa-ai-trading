@@ -20,6 +20,10 @@ export default async function DashboardPage() {
     .order("created_at", { ascending: false })
     .limit(3);
 
+  const briefing = user?.user_metadata?.daily_briefing as
+    | { content: string; generated_at: string }
+    | undefined;
+
   return (
     <div className="space-y-8">
       <div>
@@ -28,6 +32,22 @@ export default async function DashboardPage() {
           Paper trading research — simulated environment only
         </p>
       </div>
+
+      {briefing?.content && (
+        <div className="bg-indigo-950 border border-indigo-700 rounded-xl p-6">
+          <div className="flex justify-between items-start mb-3 gap-4 flex-wrap">
+            <h2 className="font-semibold flex items-center gap-2">
+              👔 CEO Agent — Daily Briefing
+            </h2>
+            <span className="text-xs text-indigo-300">
+              {new Date(briefing.generated_at).toLocaleString()}
+            </span>
+          </div>
+          <pre className="text-sm whitespace-pre-wrap leading-relaxed text-indigo-100 font-sans">
+            {briefing.content}
+          </pre>
+        </div>
+      )}
 
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
