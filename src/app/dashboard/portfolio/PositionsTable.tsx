@@ -79,8 +79,8 @@ export default function PositionsTable({
   let totalPnl = 0;
 
   return (
-    <>
-      <table className="w-full text-sm">
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm min-w-[640px]">
         <thead className="text-xs text-[var(--muted)] border-b border-[var(--card-border)]">
           <tr>
             <th className="text-left py-2 px-2">Symbol</th>
@@ -197,6 +197,6 @@ export default function PositionsTable({
           </tfoot>
         )}
       </table>
-    </>
+    </div>
   );
 }

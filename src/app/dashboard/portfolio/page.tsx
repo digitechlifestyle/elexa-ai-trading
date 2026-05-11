@@ -65,47 +65,49 @@ export default async function PortfolioPage() {
         {trades.length === 0 ? (
           <p className="text-sm text-[var(--muted)]">No trades yet.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="text-xs text-[var(--muted)] border-b border-[var(--card-border)]">
-              <tr>
-                <th className="text-left py-2 px-2">Date</th>
-                <th className="text-left py-2 px-2">Symbol</th>
-                <th className="text-left py-2 px-2">Side</th>
-                <th className="text-right py-2 px-2">Qty</th>
-                <th className="text-right py-2 px-2">Price</th>
-                <th className="text-left py-2 px-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {trades.map((t) => (
-                <tr
-                  key={t.id}
-                  className="border-b border-[var(--card-border)] last:border-0"
-                >
-                  <td className="py-2 px-2 text-[var(--muted)] text-xs">
-                    {new Date(t.created_at).toLocaleString()}
-                  </td>
-                  <td className="py-2 px-2 font-medium">{t.symbol}</td>
-                  <td
-                    className={`py-2 px-2 ${
-                      t.side === "buy" ? "text-green-400" : "text-red-400"
-                    }`}
-                  >
-                    {t.side.toUpperCase()}
-                  </td>
-                  <td className="py-2 px-2 text-right">{t.qty}</td>
-                  <td className="py-2 px-2 text-right">
-                    {t.filled_price != null
-                      ? `$${Number(t.filled_price).toFixed(2)}`
-                      : "—"}
-                  </td>
-                  <td className="py-2 px-2 text-xs text-[var(--muted)]">
-                    {t.status}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[640px]">
+              <thead className="text-xs text-[var(--muted)] border-b border-[var(--card-border)]">
+                <tr>
+                  <th className="text-left py-2 px-2">Date</th>
+                  <th className="text-left py-2 px-2">Symbol</th>
+                  <th className="text-left py-2 px-2">Side</th>
+                  <th className="text-right py-2 px-2">Qty</th>
+                  <th className="text-right py-2 px-2">Price</th>
+                  <th className="text-left py-2 px-2">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {trades.map((t) => (
+                  <tr
+                    key={t.id}
+                    className="border-b border-[var(--card-border)] last:border-0"
+                  >
+                    <td className="py-2 px-2 text-[var(--muted)] text-xs">
+                      {new Date(t.created_at).toLocaleString()}
+                    </td>
+                    <td className="py-2 px-2 font-medium">{t.symbol}</td>
+                    <td
+                      className={`py-2 px-2 ${
+                        t.side === "buy" ? "text-green-400" : "text-red-400"
+                      }`}
+                    >
+                      {t.side.toUpperCase()}
+                    </td>
+                    <td className="py-2 px-2 text-right">{t.qty}</td>
+                    <td className="py-2 px-2 text-right">
+                      {t.filled_price != null
+                        ? `$${Number(t.filled_price).toFixed(2)}`
+                        : "—"}
+                    </td>
+                    <td className="py-2 px-2 text-xs text-[var(--muted)]">
+                      {t.status}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
