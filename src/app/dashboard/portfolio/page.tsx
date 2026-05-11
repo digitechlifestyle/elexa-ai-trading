@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import PortfolioForm from "./PortfolioForm";
 import PositionsTable from "./PositionsTable";
+import ShareTradeButton from "./ShareTradeButton";
 
 export default async function PortfolioPage() {
   const supabase = await createClient();
@@ -75,6 +76,7 @@ export default async function PortfolioPage() {
                   <th className="text-right py-2 px-2">Qty</th>
                   <th className="text-right py-2 px-2">Price</th>
                   <th className="text-left py-2 px-2">Status</th>
+                  <th className="text-right py-2 px-2">Share</th>
                 </tr>
               </thead>
               <tbody>
@@ -102,6 +104,9 @@ export default async function PortfolioPage() {
                     </td>
                     <td className="py-2 px-2 text-xs text-[var(--muted)]">
                       {t.status}
+                    </td>
+                    <td className="py-2 px-2 text-right">
+                      <ShareTradeButton tradeId={t.id} />
                     </td>
                   </tr>
                 ))}
