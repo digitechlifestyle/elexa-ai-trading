@@ -25,6 +25,9 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+  if (!user.user_metadata?.onboarding_completed_at) {
+    redirect("/onboarding");
+  }
 
   return (
     <div className="flex min-h-screen">
