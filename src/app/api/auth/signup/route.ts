@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createAdminSdk } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const refParam = (formData.get("ref") as string | null) ?? null;
 
   if (!email || !password) {
     return NextResponse.redirect(
@@ -14,7 +16,10 @@ export async function POST(request: NextRequest) {
 
   if (password.length < 8) {
     return NextResponse.redirect(
-      new URL("/signup?error=Password%20must%20be%20at%20least%208%20characters", request.url)
+      new URL(
+        "/signup?error=Password%20must%20be%20at%20least%208%20characters",
+        request.url
+      )
     );
   }
 
@@ -33,7 +38,26 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // If email confirmation is required, redirect to login with a message
+  // If we have a ref code and a user, attach referred_by
+  if (data.user && refParam && /^[A-Z0-9]{4,12}$/.test(refParam.toUpperCase())) {
+    try {
+      const admin = createAdminSdk(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+      );
+      await admin.auth.admin.updateUserById(data.user.id, {
+        user_metadata: {
+          ...(data.user.user_metadata ?? {}),
+          referred_by: refParam.toUpperCase(),
+        },
+      });
+    } catch {
+      // non-fatal — signup still succeeds
+    }
+  }
+
+  // If email confirmation is required, redirect to login
   if (data.user && !data.session) {
     return NextResponse.redirect(
       new URL(
@@ -43,6 +67,5 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Auto-confirmed — go straight to dashboard
   return NextResponse.redirect(new URL("/dashboard", request.url));
 }

@@ -8,9 +8,9 @@ export const metadata: Metadata = {
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; message?: string }>;
+  searchParams: Promise<{ error?: string; message?: string; ref?: string }>;
 }) {
-  const { error, message } = await searchParams;
+  const { error, message, ref } = await searchParams;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
@@ -31,7 +31,16 @@ export default async function SignupPage({
           </div>
         )}
 
+        {ref && (
+          <div className="bg-indigo-950 border border-indigo-800 text-indigo-200 text-xs rounded-lg px-3 py-2 mb-4">
+            🎁 Referred by <span className="font-mono font-semibold">{ref.toUpperCase()}</span>
+          </div>
+        )}
+
         <form action="/api/auth/signup" method="POST" className="space-y-4">
+          {ref && (
+            <input type="hidden" name="ref" value={ref.toUpperCase()} />
+          )}
           <div>
             <label className="block text-sm mb-1.5" htmlFor="email">
               Email
