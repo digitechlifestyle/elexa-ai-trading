@@ -3,6 +3,7 @@ import { AgentBus } from "@/lib/agents/bus";
 import { ALL_AGENTS } from "@/lib/agents/registry";
 import { withApi } from "@/lib/observability/api-handler";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { getPlanForUser } from "@/lib/billing/plans";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
@@ -74,6 +75,24 @@ export const POST = withApi(async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Gate Auto-Trade behind Pro plan
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const userPlan = getPlanForUser(user, profile?.role ?? null);
+  if (!userPlan.limits.auto_trade) {
+    return NextResponse.json(
+      {
+        error: "Auto-Trade is a Pro feature.",
+        upgrade_url: "/pricing",
+        plan: userPlan.id,
+      },
+      { status: 402 }
+    );
   }
 
   const rl = await checkRateLimit({

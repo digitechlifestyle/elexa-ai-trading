@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { withApi } from "@/lib/observability/api-handler";
+import { getPlanForUser } from "@/lib/billing/plans";
 import { NextRequest, NextResponse } from "next/server";
 
 function escapeCsv(v: unknown): string {
@@ -22,6 +23,23 @@ export const GET = withApi(async function GET(_request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Gate behind paid plan
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const plan = getPlanForUser(user, profile?.role ?? null);
+  if (!plan.limits.csv_export) {
+    return NextResponse.json(
+      {
+        error: "CSV export requires Researcher tier or higher.",
+        upgrade_url: "/pricing",
+      },
+      { status: 402 }
+    );
   }
 
   const { data: trades, error } = await supabase

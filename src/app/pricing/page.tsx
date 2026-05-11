@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import UpgradeButton from "./UpgradeButton";
 
 export const metadata: Metadata = {
   title: "Pricing — Paper Trading Research Plans",
@@ -7,56 +8,71 @@ export const metadata: Metadata = {
     "Elexa AI Trading pricing. Paper trading research tool plans. Not financial advice.",
 };
 
-const plans = [
+type PricingPlan = {
+  id: "free" | "researcher" | "pro";
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  cta: string;
+  highlight: boolean;
+  hrefIfFree?: string;
+};
+
+const plans: PricingPlan[] = [
   {
+    id: "free",
     name: "Free",
     price: "$0",
     period: "forever",
     description: "Explore the platform and run paper trades manually.",
     features: [
       "Paper trading dashboard",
-      "5 manual paper trades / day",
-      "Basic trade journal",
+      "5 AI agent runs / day",
+      "Basic trade journal (30-day retention)",
+      "Watchlist (5 symbols)",
       "Risk limit enforcement",
       "Community support",
     ],
     cta: "Get Started",
-    href: "/dashboard",
+    hrefIfFree: "/dashboard",
     highlight: false,
   },
   {
+    id: "researcher",
     name: "Researcher",
     price: "$29",
     period: "/ month",
     description: "Unlock AI agents and deeper signal analysis.",
     features: [
       "Everything in Free",
-      "Unlimited paper trades",
-      "All 6 AI agents",
-      "Agent run history & logs",
-      "Trade journal with AI notes",
+      "Unlimited agent runs",
+      "3 paper portfolios",
+      "1-year journal retention",
+      "Watchlist (30 symbols)",
+      "CSV trade export",
       "Email support",
     ],
     cta: "Start Researcher",
-    href: "/dashboard",
     highlight: true,
   },
   {
+    id: "pro",
     name: "Pro",
     price: "$99",
     period: "/ month",
-    description: "Full platform access for serious research teams.",
+    description: "Full platform access for serious traders.",
     features: [
       "Everything in Researcher",
-      "Multi-portfolio paper trading",
-      "Advanced backtesting reports",
-      "Compliance agent for content review",
-      "SEO agent for blog generation",
+      "Auto-Trade workflow (Quant → Risk → execute)",
+      "Custom risk profiles per portfolio",
+      "API access (read-only)",
+      "Advanced agent orchestration",
       "Priority support",
-      "Admin panel access",
+      "Live trading (when activated)",
     ],
     cta: "Start Pro",
-    href: "/dashboard",
     highlight: false,
   },
 ];
@@ -107,16 +123,24 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <Link
-              href={plan.href}
-              className={`text-center py-3 rounded-lg font-semibold transition-colors ${
-                plan.highlight
-                  ? "bg-indigo-600 hover:bg-indigo-500 text-white"
-                  : "border border-[var(--card-border)] hover:border-indigo-600 text-white"
-              }`}
-            >
-              {plan.cta}
-            </Link>
+            {plan.id === "free" ? (
+              <Link
+                href={plan.hrefIfFree ?? "/dashboard"}
+                className={`text-center py-3 rounded-lg font-semibold transition-colors ${
+                  plan.highlight
+                    ? "bg-indigo-600 hover:bg-indigo-500 text-white"
+                    : "border border-[var(--card-border)] hover:border-indigo-600 text-white"
+                }`}
+              >
+                {plan.cta}
+              </Link>
+            ) : (
+              <UpgradeButton
+                plan={plan.id}
+                label={plan.cta}
+                highlight={plan.highlight}
+              />
+            )}
           </div>
         ))}
       </div>
