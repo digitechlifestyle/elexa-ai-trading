@@ -50,16 +50,30 @@ export default async function AdminPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <h1 className="text-2xl font-bold">Admin Panel</h1>
-        <div
-          className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
-            liveTradingEnabled
-              ? "bg-red-900 border border-red-700 text-red-300"
-              : "bg-green-950 border border-green-800 text-green-300"
-          }`}
-        >
-          Live Trading: {liveTradingEnabled ? "⚠️ ENABLED" : "✓ Disabled (paper only)"}
+        <div className="flex items-center gap-3">
+          <a
+            href="/admin/errors"
+            className="text-sm bg-[var(--card)] border border-[var(--card-border)] hover:border-indigo-600 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Error Dashboard
+          </a>
+          <a
+            href="/admin/setup"
+            className="text-sm bg-[var(--card)] border border-[var(--card-border)] hover:border-indigo-600 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            User Setup
+          </a>
+          <div
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+              liveTradingEnabled
+                ? "bg-red-900 border border-red-700 text-red-300"
+                : "bg-green-950 border border-green-800 text-green-300"
+            }`}
+          >
+            Live: {liveTradingEnabled ? "⚠️ ENABLED" : "✓ Paper"}
+          </div>
         </div>
       </div>
 
