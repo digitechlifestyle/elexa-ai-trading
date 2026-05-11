@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import NotificationsBell from "@/components/NotificationsBell";
 
 const nav = [
   { href: "/dashboard", label: "Overview" },
@@ -70,6 +71,10 @@ export default async function DashboardLayout({
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-auto">
+        {/* Top bar */}
+        <div className="border-b border-[var(--card-border)] px-8 py-3 flex justify-end items-center gap-2">
+          <NotificationsBell />
+        </div>
         <div className="px-8 py-6 flex-1">{children}</div>
       </div>
     </div>
