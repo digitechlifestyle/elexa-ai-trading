@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { computeStreak } from "@/lib/streak";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -19,6 +20,25 @@ export default async function DashboardPage() {
     .eq("user_id", user!.id)
     .order("created_at", { ascending: false })
     .limit(3);
+
+  // Streak — pull last 90 days of activity for snappy compute
+  const since90 = new Date(Date.now() - 90 * 86400 * 1000).toISOString();
+  const [allTrades, allAgents] = await Promise.all([
+    supabase
+      .from("trades")
+      .select("created_at")
+      .eq("user_id", user!.id)
+      .gte("created_at", since90),
+    supabase
+      .from("agent_runs")
+      .select("created_at")
+      .eq("user_id", user!.id)
+      .gte("created_at", since90),
+  ]);
+  const streak = computeStreak([
+    ...((allTrades.data ?? []).map((r) => r.created_at)),
+    ...((allAgents.data ?? []).map((r) => r.created_at)),
+  ]);
 
   const briefing = user?.user_metadata?.daily_briefing as
     | { content: string; generated_at: string }
@@ -52,10 +72,13 @@ export default async function DashboardPage() {
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
+          {
+            label: "🔥 Streak",
+            value: streak.current_streak > 0 ? `${streak.current_streak} days` : "—",
+          },
           { label: "Paper Trades", value: recentTrades?.length ?? 0 },
           { label: "Agent Runs", value: agentRuns?.length ?? 0 },
           { label: "Mode", value: "Paper" },
-          { label: "Live Trading", value: "Disabled" },
         ].map((s) => (
           <div
             key={s.label}
