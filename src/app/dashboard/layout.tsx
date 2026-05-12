@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import NotificationsBell from "@/components/NotificationsBell";
+import ChatWidget from "@/components/ChatWidget";
 
 export default async function DashboardLayout({
   children,
@@ -27,6 +28,7 @@ export default async function DashboardLayout({
         </div>
         <div className="px-4 md:px-8 py-6 flex-1">{children}</div>
       </div>
+      <ChatWidget />
     </div>
   );
 }
