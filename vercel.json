@@ -5,6 +5,10 @@
       "schedule": "*/5 * * * *"
     },
     {
+      "path": "/api/cron/check-alerts",
+      "schedule": "*/5 * * * *"
+    },
+    {
       "path": "/api/cron/daily-briefing",
       "schedule": "0 12 * * *"
     },

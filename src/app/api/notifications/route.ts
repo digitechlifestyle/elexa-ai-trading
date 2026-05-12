@@ -86,6 +86,27 @@ export const GET = withApi(async function GET(request: NextRequest) {
     });
   }
 
+  // Triggered alerts from user_metadata
+  const alerts = (user.user_metadata?.alerts ?? []) as {
+    id: string;
+    symbol: string;
+    kind: string;
+    value: number;
+    triggered_at?: string | null;
+  }[];
+  for (const al of alerts) {
+    if (!al.triggered_at) continue;
+    if (new Date(al.triggered_at) < since) continue;
+    items.push({
+      id: `alert-${al.id}`,
+      kind: "info",
+      title: `🔔 Alert: ${al.symbol} ${al.kind.replace(/_/g, " ")} ${al.value}${al.kind.includes("pct") ? "%" : ""}`,
+      body: "Threshold crossed.",
+      created_at: al.triggered_at,
+      href: "/dashboard/alerts",
+    });
+  }
+
   items.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 
   const lastReadAt =
