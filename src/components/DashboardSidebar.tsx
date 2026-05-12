@@ -12,6 +12,7 @@ const nav = [
   { href: "/dashboard/analytics", label: "Analytics", icon: "📈" },
   { href: "/dashboard/journal", label: "Journal", icon: "📓" },
   { href: "/dashboard/agents", label: "Agents", icon: "🤖" },
+  { href: "/dashboard/scanner", label: "Scanner", icon: "🔍" },
   { href: "/dashboard/auto-trade", label: "Auto Trade", icon: "✨" },
   { href: "/dashboard/backtest", label: "Backtest", icon: "🧪" },
   { href: "/leaderboard", label: "Leaderboard", icon: "🏆" },
