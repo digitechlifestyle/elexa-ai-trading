@@ -13,13 +13,27 @@ export const metadata: Metadata = {
   ),
   icons: {
     icon: "/favicon.ico",
+    apple: "/elexa-logo.svg",
   },
+  manifest: "/manifest.webmanifest",
   openGraph: {
     siteName: "Elexa AI Trading",
     type: "website",
     images: [{ url: "/elexa-logo.svg" }],
   },
   robots: { index: true, follow: true },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Elexa",
+  },
+};
+
+export const viewport = {
+  themeColor: "#0a0a0f",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 const RISK_BANNER =

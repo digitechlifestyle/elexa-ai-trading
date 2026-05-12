@@ -1,0 +1,42 @@
+{
+  "name": "Elexa AI Trading",
+  "short_name": "Elexa",
+  "description": "AI agents that research. You decide what's real. Paper-only research platform.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/elexa-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["finance", "productivity", "education"],
+  "shortcuts": [
+    {
+      "name": "Portfolio",
+      "url": "/dashboard/portfolio",
+      "description": "Place a paper trade"
+    },
+    {
+      "name": "Watchlist",
+      "url": "/dashboard/watchlist",
+      "description": "Track symbols"
+    },
+    {
+      "name": "Auto Trade",
+      "url": "/dashboard/auto-trade",
+      "description": "Generate AI trade proposal"
+    }
+  ]
+}
