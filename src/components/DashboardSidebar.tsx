@@ -18,6 +18,7 @@ const nav = [
   { href: "/dashboard/backtest", label: "Backtest", icon: "🧪" },
   { href: "/leaderboard", label: "Leaderboard", icon: "🏆" },
   { href: "/dashboard/referrals", label: "Refer & Earn", icon: "🎁" },
+  { href: "/dashboard/api-keys", label: "API Keys", icon: "🔑" },
   { href: "/dashboard/settings", label: "Settings", icon: "⚙️" },
   { href: "/guide", label: "Guide", icon: "📖" },
 ];
