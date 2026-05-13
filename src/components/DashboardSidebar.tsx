@@ -90,6 +90,10 @@ const nav = [
   { href: "/dashboard/referrals", label: "Refer & Earn", icon: "🎁" },
   { href: "/dashboard/api-keys", label: "API Keys", icon: "🔑" },
   { href: "/dashboard/webhooks", label: "Webhooks", icon: "📡" },
+  { href: "/dashboard/export", label: "Export CSV", icon: "📤" },
+  { href: "/dashboard/system-health", label: "System Health", icon: "🩺" },
+  { href: "/dashboard/donchian", label: "Donchian Breakout", icon: "🐢" },
+  { href: "/dashboard/ichimoku", label: "Ichimoku", icon: "☁️" },
   { href: "/dashboard/settings", label: "Settings", icon: "⚙️" },
   { href: "/guide", label: "Guide", icon: "📖" },
 ];
