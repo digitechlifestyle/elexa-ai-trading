@@ -5,6 +5,7 @@ import NotificationsBell from "@/components/NotificationsBell";
 import ChatWidget from "@/components/ChatWidget";
 import ThemeToggle from "@/components/ThemeToggle";
 import KeyboardShortcuts from "@/components/KeyboardShortcuts";
+import TickerTape from "@/components/TickerTape";
 
 export default async function DashboardLayout({
   children,
@@ -25,6 +26,7 @@ export default async function DashboardLayout({
       <DashboardSidebar email={user.email ?? ""} />
 
       <div className="flex-1 flex flex-col overflow-auto">
+        <TickerTape />
         <div className="border-b border-[var(--card-border)] px-4 md:px-8 py-3 flex justify-end items-center gap-2">
           <span className="hidden md:inline text-xs text-[var(--muted)] mr-2">
             Press <kbd className="bg-[var(--background)] border border-[var(--card-border)] px-1.5 py-0.5 rounded text-[10px] font-mono">⌘ K</kbd> for quick trade · <kbd className="bg-[var(--background)] border border-[var(--card-border)] px-1.5 py-0.5 rounded text-[10px] font-mono">?</kbd> for help
