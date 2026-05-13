@@ -32,6 +32,7 @@ const nav = [
   { href: "/dashboard/journal-summary", label: "Journal AI Summary", icon: "🧠" },
   { href: "/dashboard/agents", label: "Agents", icon: "🤖" },
   { href: "/dashboard/scanner", label: "Scanner", icon: "🔍" },
+  { href: "/dashboard/scanners", label: "Market Scanners", icon: "🔭" },
   { href: "/dashboard/scan-52w", label: "52w Scanner", icon: "🎯" },
   { href: "/dashboard/movers", label: "Top Movers", icon: "🚀" },
   { href: "/dashboard/strength-meter", label: "Strength Meter", icon: "💪" },

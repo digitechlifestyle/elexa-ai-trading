@@ -33,6 +33,7 @@ const COMMANDS: Command[] = [
   { label: "Risk On/Off", href: "/dashboard/risk-regime", icon: "🌡️", keywords: "risk on off composite breadth safe haven" },
   { label: "Trade Grader", href: "/dashboard/trade-grades", icon: "🎓", keywords: "trade quality grade score review" },
   { label: "Multi-Beta", href: "/dashboard/multi-beta", icon: "β", keywords: "beta alpha factor benchmark regression r squared" },
+  { label: "Market Scanners", href: "/dashboard/scanners", icon: "🔭", keywords: "bollinger squeeze rsi volume spike zscore scanner" },
   { label: "Multi-Timeframe", href: "/dashboard/mtf", icon: "📺" },
   { label: "Analytics", href: "/dashboard/analytics", icon: "📈" },
   { label: "Trade Replay", href: "/dashboard/trade-replay", icon: "🎬" },
