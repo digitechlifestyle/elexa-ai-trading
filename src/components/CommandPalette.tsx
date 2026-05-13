@@ -28,6 +28,7 @@ const COMMANDS: Command[] = [
   { label: "ATR Position Sizer", href: "/dashboard/atr-sizer", icon: "📏", keywords: "atr position size volatility stop" },
   { label: "Exit Planner", href: "/dashboard/exit-planner", icon: "🪜", keywords: "exit scale tranche target breakeven" },
   { label: "Trend Score", href: "/dashboard/trend-score", icon: "📊", keywords: "trend score moving average alignment regime" },
+  { label: "Trade Stats", href: "/dashboard/trade-stats", icon: "📈", keywords: "equity curve drawdown r distribution hour weekday performance" },
   { label: "Multi-Timeframe", href: "/dashboard/mtf", icon: "📺" },
   { label: "Analytics", href: "/dashboard/analytics", icon: "📈" },
   { label: "Trade Replay", href: "/dashboard/trade-replay", icon: "🎬" },

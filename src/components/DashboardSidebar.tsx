@@ -21,6 +21,7 @@ const nav = [
   { href: "/dashboard/trend-score", label: "Trend Score", icon: "📊" },
   { href: "/dashboard/mtf", label: "Multi-Timeframe", icon: "📺" },
   { href: "/dashboard/analytics", label: "Analytics", icon: "📈" },
+  { href: "/dashboard/trade-stats", label: "Trade Stats", icon: "📈" },
   { href: "/dashboard/trade-replay", label: "Trade Replay", icon: "🎬" },
   { href: "/dashboard/portfolio-qa", label: "Portfolio Q&A", icon: "💬" },
   { href: "/dashboard/journal", label: "Journal", icon: "📓" },
