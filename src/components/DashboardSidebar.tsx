@@ -28,6 +28,7 @@ const groups: NavGroup[] = [
     emoji: "📉",
     items: [
       { href: "/dashboard/charts", label: "Charts", icon: "📉" },
+      { href: "/dashboard/symbol-compare", label: "Symbol Compare", icon: "📊" },
       { href: "/dashboard/indicators", label: "Indicators", icon: "📊" },
       { href: "/dashboard/mtf", label: "Multi-Timeframe", icon: "📺" },
       { href: "/dashboard/anchored-vwap", label: "Anchored VWAP", icon: "⚓" },
@@ -68,6 +69,7 @@ const groups: NavGroup[] = [
       { href: "/dashboard/vix-term", label: "VIX Term", icon: "📊" },
       { href: "/dashboard/sentiment", label: "Sentiment", icon: "😱" },
       { href: "/dashboard/onchain", label: "On-Chain", icon: "⛓" },
+      { href: "/dashboard/crypto-ratios", label: "Crypto Ratios", icon: "🪙" },
       { href: "/dashboard/cot", label: "COT", icon: "📋" },
       { href: "/dashboard/insider", label: "Insider", icon: "🕵" },
       { href: "/dashboard/moon", label: "Moon & Gann", icon: "🌙" },
@@ -102,6 +104,7 @@ const groups: NavGroup[] = [
       { href: "/dashboard/analytics", label: "Analytics", icon: "📈" },
       { href: "/dashboard/symbol-stats", label: "Symbol Stats", icon: "📊" },
       { href: "/dashboard/trade-stats", label: "Trade Stats", icon: "📈" },
+      { href: "/dashboard/pnl-calendar", label: "P&L Calendar", icon: "📅" },
       { href: "/dashboard/trade-grades", label: "Trade Grader", icon: "🎓" },
       { href: "/dashboard/trade-replay", label: "Trade Replay", icon: "🎬" },
       { href: "/dashboard/tag-analytics", label: "Tag Analytics", icon: "🏷" },
@@ -133,6 +136,7 @@ const groups: NavGroup[] = [
       { href: "/dashboard/backtest", label: "Backtest", icon: "🧪" },
       { href: "/dashboard/backtest-compare", label: "Backtest Compare", icon: "⚔️" },
       { href: "/dashboard/strategy-builder", label: "Strategy Builder", icon: "🛠" },
+      { href: "/dashboard/strategy-templates", label: "Strategy Templates", icon: "📚" },
     ],
   },
   {
