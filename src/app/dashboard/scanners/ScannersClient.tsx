@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type ScannerType = "squeeze" | "rsi" | "volume" | "zscore";
+type ScannerType = "squeeze" | "rsi" | "volume" | "zscore" | "supertrend" | "ttm";
 
 interface Result {
   symbol: string;
@@ -13,6 +13,8 @@ interface Result {
   rsi?: number | null;
   volume_ratio?: number | null;
   z?: number | null;
+  supertrend?: { direction: number; level: number | null; flipped_recent: boolean };
+  ttm?: { squeeze_on: boolean; momentum: number; firing: "up" | "down" | null };
 }
 
 const PRESETS: Record<string, string> = {
@@ -27,6 +29,8 @@ const TABS: { id: ScannerType; label: string; icon: string }[] = [
   { id: "rsi", label: "RSI", icon: "📈" },
   { id: "volume", label: "Volume Spike", icon: "📊" },
   { id: "zscore", label: "Z-Score", icon: "📐" },
+  { id: "supertrend", label: "SuperTrend", icon: "🟢" },
+  { id: "ttm", label: "TTM Squeeze", icon: "💥" },
 ];
 
 export default function ScannersClient() {
@@ -115,6 +119,18 @@ function sortFor(tab: ScannerType, rows: Result[]): Result[] {
   if (tab === "rsi") return [...valid].sort((a, b) => (a.rsi ?? 50) - (b.rsi ?? 50));
   if (tab === "volume") return [...valid].sort((a, b) => (b.volume_ratio ?? 0) - (a.volume_ratio ?? 0));
   if (tab === "zscore") return [...valid].sort((a, b) => Math.abs(b.z ?? 0) - Math.abs(a.z ?? 0));
+  if (tab === "supertrend") return [...valid].sort((a, b) => {
+    const flipA = a.supertrend?.flipped_recent ? 1 : 0;
+    const flipB = b.supertrend?.flipped_recent ? 1 : 0;
+    if (flipA !== flipB) return flipB - flipA;
+    return (b.supertrend?.direction ?? 0) - (a.supertrend?.direction ?? 0);
+  });
+  if (tab === "ttm") return [...valid].sort((a, b) => {
+    const fA = a.ttm?.firing ? 1 : 0;
+    const fB = b.ttm?.firing ? 1 : 0;
+    if (fA !== fB) return fB - fA;
+    return Math.abs(b.ttm?.momentum ?? 0) - Math.abs(a.ttm?.momentum ?? 0);
+  });
   return valid;
 }
 
@@ -213,6 +229,70 @@ function renderTable(tab: ScannerType, rows: Result[]) {
       </table>
     );
   }
+  if (tab === "supertrend") {
+    return (
+      <table className="w-full text-sm">
+        <thead className="text-xs text-[var(--muted)]">
+          <tr className="text-left border-b border-[var(--card-border)]">
+            <th className="py-2 pr-3">Symbol</th>
+            <th className="py-2 pr-3 text-right">Price</th>
+            <th className="py-2 pr-3 text-right">Trail level</th>
+            <th className="py-2 pr-3">Direction</th>
+            <th className="py-2 pr-3">Flipped</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => {
+            const dir = r.supertrend?.direction ?? 0;
+            const dirLabel = dir === 1 ? { text: "↑ Long", color: "text-green-400" } :
+                            dir === -1 ? { text: "↓ Short", color: "text-red-400" } :
+                            { text: "—", color: "text-[var(--muted)]" };
+            return (
+              <tr key={r.symbol} className="border-b border-[var(--card-border)] last:border-0">
+                <td className="py-2 pr-3 font-mono font-semibold">{r.symbol}</td>
+                <td className="py-2 pr-3 text-right font-mono">${(r.price ?? 0).toFixed(2)}</td>
+                <td className="py-2 pr-3 text-right font-mono">{r.supertrend?.level != null ? `$${r.supertrend.level.toFixed(2)}` : "—"}</td>
+                <td className={`py-2 pr-3 font-bold ${dirLabel.color}`}>{dirLabel.text}</td>
+                <td className="py-2 pr-3">{r.supertrend?.flipped_recent ? <span className="text-amber-400 font-bold">⚡ TODAY</span> : "—"}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
+  }
+  if (tab === "ttm") {
+    return (
+      <table className="w-full text-sm">
+        <thead className="text-xs text-[var(--muted)]">
+          <tr className="text-left border-b border-[var(--card-border)]">
+            <th className="py-2 pr-3">Symbol</th>
+            <th className="py-2 pr-3 text-right">Price</th>
+            <th className="py-2 pr-3 text-right">Momentum</th>
+            <th className="py-2 pr-3">Squeeze</th>
+            <th className="py-2 pr-3">Firing</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.symbol} className="border-b border-[var(--card-border)] last:border-0">
+              <td className="py-2 pr-3 font-mono font-semibold">{r.symbol}</td>
+              <td className="py-2 pr-3 text-right font-mono">${(r.price ?? 0).toFixed(2)}</td>
+              <td className={`py-2 pr-3 text-right font-mono ${(r.ttm?.momentum ?? 0) >= 0 ? "text-green-400" : "text-red-400"}`}>
+                {r.ttm?.momentum != null ? r.ttm.momentum.toFixed(2) : "—"}
+              </td>
+              <td className="py-2 pr-3">{r.ttm?.squeeze_on ? <span className="text-red-400 font-bold">ON 🔒</span> : <span className="text-[var(--muted)]">off</span>}</td>
+              <td className="py-2 pr-3">
+                {r.ttm?.firing === "up" && <span className="text-green-400 font-bold">↑ FIRING UP</span>}
+                {r.ttm?.firing === "down" && <span className="text-red-400 font-bold">↓ FIRING DOWN</span>}
+                {!r.ttm?.firing && <span className="text-[var(--muted)]">—</span>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
   // zscore
   return (
     <table className="w-full text-sm">
@@ -262,6 +342,18 @@ function hints(tab: ScannerType) {
     <div className="space-y-1">
       <p><strong>Volume &gt; 2× avg:</strong> something happened. News, breakout, capitulation.</p>
       <p>Volume confirms price moves. Big move on thin volume = suspect.</p>
+    </div>
+  );
+  if (tab === "supertrend") return (
+    <div className="space-y-1">
+      <p><strong>SuperTrend:</strong> ATR-based trailing stop. Above price = short, below = long.</p>
+      <p><strong>Flipped today:</strong> regime change candidate — directional bet with stop at the trail level.</p>
+    </div>
+  );
+  if (tab === "ttm") return (
+    <div className="space-y-1">
+      <p><strong>TTM Squeeze (John Carter):</strong> Bollinger inside Keltner = volatility compression.</p>
+      <p><strong>Firing</strong>: squeeze just released; momentum sign points entry direction.</p>
     </div>
   );
   return (

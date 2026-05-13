@@ -56,6 +56,23 @@ export default async function DashboardPage() {
         </p>
       </div>
 
+      {(recentTrades?.length ?? 0) === 0 && (
+        <div className="bg-indigo-950 border border-indigo-700 rounded-xl p-6 flex justify-between items-center gap-4 flex-wrap">
+          <div>
+            <h2 className="font-semibold mb-1">👋 New here? Try the demo first.</h2>
+            <p className="text-sm text-indigo-200">
+              Populate your dashboard with sample trades so equity curve, trade stats, and AI summaries have data to work with.
+            </p>
+          </div>
+          <a
+            href="/dashboard/demo"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg text-sm font-semibold whitespace-nowrap"
+          >
+            Seed demo data →
+          </a>
+        </div>
+      )}
+
       {briefing?.content && (
         <div className="bg-indigo-950 border border-indigo-700 rounded-xl p-6">
           <div className="flex justify-between items-start mb-3 gap-4 flex-wrap">
