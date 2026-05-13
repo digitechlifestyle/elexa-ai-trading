@@ -43,6 +43,9 @@ export default async function DashboardPage() {
   const briefing = user?.user_metadata?.daily_briefing as
     | { content: string; generated_at: string }
     | undefined;
+  const weekly = user?.user_metadata?.weekly_review as
+    | { content: string; generated_at: string; trades_count: number; realised_pnl: number }
+    | undefined;
 
   return (
     <div className="space-y-8">
@@ -67,6 +70,29 @@ export default async function DashboardPage() {
             {briefing.content}
           </pre>
         </div>
+      )}
+
+      {weekly?.content && (
+        <details className="bg-purple-950 border border-purple-700 rounded-xl p-6">
+          <summary className="cursor-pointer flex justify-between items-center gap-4 flex-wrap">
+            <h2 className="font-semibold flex items-center gap-2">
+              📋 Weekly Review — {weekly.trades_count} trades · {" "}
+              <span
+                className={
+                  weekly.realised_pnl >= 0 ? "text-green-400" : "text-red-400"
+                }
+              >
+                {weekly.realised_pnl >= 0 ? "+" : ""}${weekly.realised_pnl.toFixed(2)}
+              </span>
+            </h2>
+            <span className="text-xs text-purple-300">
+              {new Date(weekly.generated_at).toLocaleDateString()}
+            </span>
+          </summary>
+          <pre className="text-sm whitespace-pre-wrap leading-relaxed text-purple-100 font-sans mt-4">
+            {weekly.content}
+          </pre>
+        </details>
       )}
 
       {/* Stats row */}
