@@ -38,6 +38,8 @@ const COMMANDS: Command[] = [
   { label: "System Health", href: "/dashboard/system-health", icon: "🩺", keywords: "health env checks integrations status" },
   { label: "Donchian Breakout", href: "/dashboard/donchian", icon: "🐢", keywords: "donchian turtle breakout high low" },
   { label: "Ichimoku", href: "/dashboard/ichimoku", icon: "☁️", keywords: "ichimoku cloud kumo tenkan kijun" },
+  { label: "Symbol Stats", href: "/dashboard/symbol-stats", icon: "📊", keywords: "cagr sharpe sortino calmar max drawdown volatility" },
+  { label: "Demo Data", href: "/dashboard/demo", icon: "🎮", keywords: "demo seed sample populate" },
   { label: "Multi-Timeframe", href: "/dashboard/mtf", icon: "📺" },
   { label: "Analytics", href: "/dashboard/analytics", icon: "📈" },
   { label: "Trade Replay", href: "/dashboard/trade-replay", icon: "🎬" },
