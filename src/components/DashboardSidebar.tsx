@@ -16,6 +16,7 @@ const nav = [
   { href: "/dashboard/alerts", label: "Alerts", icon: "🔔" },
   { href: "/dashboard/auto-trade", label: "Auto Trade", icon: "✨" },
   { href: "/dashboard/backtest", label: "Backtest", icon: "🧪" },
+  { href: "/dashboard/strategy-builder", label: "Strategy Builder", icon: "🛠" },
   { href: "/leaderboard", label: "Leaderboard", icon: "🏆" },
   { href: "/tournaments", label: "Tournaments", icon: "🥇" },
   { href: "/feed", label: "Feed", icon: "📰" },
