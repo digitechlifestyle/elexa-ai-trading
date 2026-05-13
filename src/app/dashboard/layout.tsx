@@ -6,6 +6,7 @@ import ChatWidget from "@/components/ChatWidget";
 import ThemeToggle from "@/components/ThemeToggle";
 import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import TickerTape from "@/components/TickerTape";
+import CommandPalette from "@/components/CommandPalette";
 
 export default async function DashboardLayout({
   children,
@@ -38,6 +39,7 @@ export default async function DashboardLayout({
       </div>
       <ChatWidget />
       <KeyboardShortcuts />
+      <CommandPalette />
     </div>
   );
 }

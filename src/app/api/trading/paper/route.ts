@@ -10,6 +10,8 @@ import { getRiskLimitsForUser } from "@/lib/trading/user-limits";
 import { withApi } from "@/lib/observability/api-handler";
 import { log } from "@/lib/observability/logger";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { deliverWebhook } from "@/lib/webhook-deliver";
+import type { OutgoingWebhook } from "@/app/api/webhooks/route";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = withApi(async function POST(request: NextRequest, { requestId }) {
@@ -252,6 +254,21 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     qty,
     exchange,
   });
+
+  // Fire outgoing webhooks (fire-and-forget)
+  const hooks = (user.user_metadata?.outgoing_webhooks ?? []) as OutgoingWebhook[];
+  if (Array.isArray(hooks) && hooks.length > 0) {
+    const event = mappedStatus === "filled" ? "trade.filled" : "trade.submitted";
+    deliverWebhook(hooks, event, {
+      symbol: symbol.toUpperCase(),
+      side,
+      qty,
+      status: mappedStatus,
+      filled_price: order.filled_price,
+      exchange,
+      trade_id: trade.id,
+    });
+  }
 
   return NextResponse.json({ trade, order }, { status: 201 });
 });
