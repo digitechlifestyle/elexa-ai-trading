@@ -26,10 +26,18 @@ export const GET = withApi(async function GET(request: NextRequest) {
 
   // Time filter
   let since: string | null = null;
+  let until: string | null = null;
   if (period === "7d") {
     since = new Date(Date.now() - 7 * 86400 * 1000).toISOString();
   } else if (period === "30d") {
     since = new Date(Date.now() - 30 * 86400 * 1000).toISOString();
+  } else if (period === "this_month") {
+    const now = new Date();
+    since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+  } else if (period === "last_month") {
+    const now = new Date();
+    since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1)).toISOString();
+    until = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
   }
 
   let q = supabase
@@ -38,6 +46,7 @@ export const GET = withApi(async function GET(request: NextRequest) {
     .eq("status", "filled")
     .eq("is_paper", true);
   if (since) q = q.gte("created_at", since);
+  if (until) q = q.lt("created_at", until);
   const { data: trades } = await q;
 
   if (!trades || trades.length === 0) {

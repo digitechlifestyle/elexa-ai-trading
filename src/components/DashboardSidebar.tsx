@@ -17,6 +17,8 @@ const nav = [
   { href: "/dashboard/auto-trade", label: "Auto Trade", icon: "✨" },
   { href: "/dashboard/backtest", label: "Backtest", icon: "🧪" },
   { href: "/leaderboard", label: "Leaderboard", icon: "🏆" },
+  { href: "/tournaments", label: "Tournaments", icon: "🥇" },
+  { href: "/feed", label: "Feed", icon: "📰" },
   { href: "/dashboard/referrals", label: "Refer & Earn", icon: "🎁" },
   { href: "/dashboard/api-keys", label: "API Keys", icon: "🔑" },
   { href: "/dashboard/settings", label: "Settings", icon: "⚙️" },
