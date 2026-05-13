@@ -41,6 +41,7 @@ const nav = [
   { href: "/dashboard/stress-test", label: "Stress Test", icon: "⚠️" },
   { href: "/dashboard/montecarlo", label: "Monte Carlo", icon: "🎲" },
   { href: "/dashboard/position-size", label: "Position Size", icon: "📏" },
+  { href: "/dashboard/profit-calc", label: "Profit Calc", icon: "💰" },
   { href: "/dashboard/dca", label: "DCA Simulator", icon: "📅" },
   { href: "/dashboard/risk-parity", label: "Risk Parity", icon: "⚖️" },
   { href: "/dashboard/options-pricer", label: "Options Pricer", icon: "🧮" },
