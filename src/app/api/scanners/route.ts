@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { withApi } from "@/lib/observability/api-handler";
 import { NextRequest, NextResponse } from "next/server";
-import { Bar, OHLC, bollingerBandwidth, bollingerSqueezeRank, lastRsi, volumeSpike, zScore, superTrend, ttmSqueeze } from "@/lib/scanners";
+import { Bar, OHLC, bollingerBandwidth, bollingerSqueezeRank, lastRsi, volumeSpike, zScore, superTrend, ttmSqueeze, connorsRsi, mfi } from "@/lib/scanners";
 
 export const POST = withApi(async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -12,7 +12,7 @@ export const POST = withApi(async function POST(request: NextRequest) {
   if (!Array.isArray(symbols) || symbols.length === 0 || symbols.length > 50) {
     return NextResponse.json({ error: "1-50 symbols required" }, { status: 422 });
   }
-  if (!["squeeze", "rsi", "volume", "zscore", "supertrend", "ttm"].includes(scanner)) {
+  if (!["squeeze", "rsi", "volume", "zscore", "supertrend", "ttm", "connors", "mfi"].includes(scanner)) {
     return NextResponse.json({ error: "Invalid scanner" }, { status: 422 });
   }
 
@@ -54,6 +54,13 @@ export const POST = withApi(async function POST(request: NextRequest) {
         const ohlc = (j.bars ?? []) as OHLC[];
         const ttm = ttmSqueeze(ohlc);
         return { symbol: s, price, ttm };
+      }
+      if (scanner === "connors") {
+        return { symbol: s, price, connors: connorsRsi(closes) };
+      }
+      if (scanner === "mfi") {
+        const ohlc = (j.bars ?? []) as OHLC[];
+        return { symbol: s, price, mfi: mfi(ohlc) };
       }
       return { symbol: s };
     } catch {

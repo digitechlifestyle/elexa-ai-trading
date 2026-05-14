@@ -23,6 +23,7 @@ const groups: NavGroup[] = [
       { href: "/dashboard/pre-trade", label: "Pre-Trade Check", icon: "✅" },
       { href: "/dashboard/trade-plan", label: "AI Trade Plan", icon: "🎯" },
       { href: "/dashboard/ai-setup-scan", label: "AI Setup Scanner", icon: "🤖" },
+      { href: "/dashboard/trade-ideas", label: "AI Trade Ideas", icon: "💡" },
       { href: "/dashboard/exit-planner", label: "Exit Planner", icon: "🪜" },
       { href: "/dashboard/trailing-stop", label: "Trailing Stop", icon: "📉" },
     ],
@@ -180,6 +181,7 @@ const groups: NavGroup[] = [
       { href: "/dashboard/system-health", label: "System Health", icon: "🩺" },
       { href: "/dashboard/demo", label: "Demo Data", icon: "🎮" },
       { href: "/guide", label: "Guide", icon: "📖" },
+      { href: "/dashboard/glossary", label: "Glossary", icon: "📖" },
     ],
   },
 ];

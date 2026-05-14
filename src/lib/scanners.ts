@@ -103,6 +103,59 @@ export function superTrend(bars: OHLC[], period = 10, mult = 3): {
   return { direction: last, level, flipped_recent: last !== prev };
 }
 
+/**
+ * Connors RSI = (RSI(close,3) + RSI(streak,2) + PercentRank(ROC,100)) / 3
+ * Streak = consecutive same-direction days
+ */
+export function connorsRsi(closes: number[]): number | null {
+  if (closes.length < 100) return null;
+  // RSI(3) on closes
+  const r3 = rsi(closes, 3).at(-1);
+  if (r3 == null) return null;
+
+  // Streak series
+  const streaks: number[] = [0];
+  for (let i = 1; i < closes.length; i++) {
+    const prev = streaks[i - 1];
+    const dir = closes[i] > closes[i - 1] ? 1 : closes[i] < closes[i - 1] ? -1 : 0;
+    if (dir === 0) streaks.push(0);
+    else if ((prev > 0 && dir > 0) || (prev < 0 && dir < 0)) streaks.push(prev + dir);
+    else streaks.push(dir);
+  }
+  const rStreak = rsi(streaks, 2).at(-1);
+  if (rStreak == null) return null;
+
+  // Percent rank of 1-day ROC over last 100
+  const rocs: number[] = [];
+  for (let i = 1; i < closes.length; i++) rocs.push((closes[i] - closes[i - 1]) / closes[i - 1]);
+  const window = rocs.slice(-100);
+  const last = window[window.length - 1];
+  const below = window.filter((v) => v < last).length;
+  const percentRank = (below / window.length) * 100;
+
+  return (r3 + rStreak + percentRank) / 3;
+}
+
+/**
+ * Money Flow Index — volume-weighted RSI
+ * Period 14 default
+ */
+export function mfi(bars: OHLC[], period = 14): number | null {
+  if (bars.length < period + 1) return null;
+  const tp = bars.map((b) => (b.h + b.l + b.c) / 3);
+  let posMf = 0;
+  let negMf = 0;
+  for (let i = bars.length - period; i < bars.length; i++) {
+    if (i === 0) continue;
+    const mf = tp[i] * bars[i].v;
+    if (tp[i] > tp[i - 1]) posMf += mf;
+    else if (tp[i] < tp[i - 1]) negMf += mf;
+  }
+  if (negMf === 0) return 100;
+  const ratio = posMf / negMf;
+  return 100 - 100 / (1 + ratio);
+}
+
 export function ttmSqueeze(bars: OHLC[], period = 20, bbMult = 2, kcMult = 1.5): {
   squeeze_on: boolean; momentum: number; firing: "up" | "down" | null;
 } {

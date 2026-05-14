@@ -55,6 +55,8 @@ const COMMANDS: Command[] = [
   { label: "Heikin-Ashi", href: "/dashboard/heikin-ashi", icon: "🕯️", keywords: "heikin ashi candles smoothed trend" },
   { label: "Wash Sale Check", href: "/dashboard/wash-sales", icon: "🧾", keywords: "wash sale tax loss 30 day rule" },
   { label: "Notifications", href: "/dashboard/notifications", icon: "🔔", keywords: "notifications history bell alerts" },
+  { label: "AI Trade Ideas", href: "/dashboard/trade-ideas", icon: "💡", keywords: "ai trade ideas claude generate setups universe" },
+  { label: "Glossary", href: "/dashboard/glossary", icon: "📖", keywords: "glossary definitions terms metrics formula" },
   { label: "Multi-Timeframe", href: "/dashboard/mtf", icon: "📺" },
   { label: "Analytics", href: "/dashboard/analytics", icon: "📈" },
   { label: "Trade Replay", href: "/dashboard/trade-replay", icon: "🎬" },

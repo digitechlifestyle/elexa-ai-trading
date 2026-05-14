@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type ScannerType = "squeeze" | "rsi" | "volume" | "zscore" | "supertrend" | "ttm";
+type ScannerType = "squeeze" | "rsi" | "volume" | "zscore" | "supertrend" | "ttm" | "connors" | "mfi";
 
 interface Result {
   symbol: string;
@@ -15,6 +15,8 @@ interface Result {
   z?: number | null;
   supertrend?: { direction: number; level: number | null; flipped_recent: boolean };
   ttm?: { squeeze_on: boolean; momentum: number; firing: "up" | "down" | null };
+  connors?: number | null;
+  mfi?: number | null;
 }
 
 const PRESETS: Record<string, string> = {
@@ -31,6 +33,8 @@ const TABS: { id: ScannerType; label: string; icon: string }[] = [
   { id: "zscore", label: "Z-Score", icon: "📐" },
   { id: "supertrend", label: "SuperTrend", icon: "🟢" },
   { id: "ttm", label: "TTM Squeeze", icon: "💥" },
+  { id: "connors", label: "Connors RSI", icon: "🎢" },
+  { id: "mfi", label: "Money Flow", icon: "💧" },
 ];
 
 export default function ScannersClient() {
@@ -131,6 +135,8 @@ function sortFor(tab: ScannerType, rows: Result[]): Result[] {
     if (fA !== fB) return fB - fA;
     return Math.abs(b.ttm?.momentum ?? 0) - Math.abs(a.ttm?.momentum ?? 0);
   });
+  if (tab === "connors") return [...valid].sort((a, b) => (a.connors ?? 50) - (b.connors ?? 50));
+  if (tab === "mfi") return [...valid].sort((a, b) => (a.mfi ?? 50) - (b.mfi ?? 50));
   return valid;
 }
 
@@ -293,6 +299,68 @@ function renderTable(tab: ScannerType, rows: Result[]) {
       </table>
     );
   }
+  if (tab === "connors") {
+    return (
+      <table className="w-full text-sm">
+        <thead className="text-xs text-[var(--muted)]">
+          <tr className="text-left border-b border-[var(--card-border)]">
+            <th className="py-2 pr-3">Symbol</th>
+            <th className="py-2 pr-3 text-right">Price</th>
+            <th className="py-2 pr-3 text-right">Connors RSI</th>
+            <th className="py-2 pr-3">Zone</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => {
+            const c = r.connors ?? 50;
+            const zone = c < 5 ? { text: "Deep oversold ✨", color: "text-green-400" } :
+                        c < 15 ? { text: "Oversold", color: "text-green-300" } :
+                        c > 95 ? { text: "Extreme overbought ⚠️", color: "text-red-400" } :
+                        c > 85 ? { text: "Overbought", color: "text-red-300" } :
+                        { text: "Neutral", color: "text-[var(--muted)]" };
+            return (
+              <tr key={r.symbol} className="border-b border-[var(--card-border)] last:border-0">
+                <td className="py-2 pr-3 font-mono font-semibold">{r.symbol}</td>
+                <td className="py-2 pr-3 text-right font-mono">${(r.price ?? 0).toFixed(2)}</td>
+                <td className="py-2 pr-3 text-right font-mono">{r.connors != null ? r.connors.toFixed(1) : "—"}</td>
+                <td className={`py-2 pr-3 ${zone.color}`}>{zone.text}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
+  }
+  if (tab === "mfi") {
+    return (
+      <table className="w-full text-sm">
+        <thead className="text-xs text-[var(--muted)]">
+          <tr className="text-left border-b border-[var(--card-border)]">
+            <th className="py-2 pr-3">Symbol</th>
+            <th className="py-2 pr-3 text-right">Price</th>
+            <th className="py-2 pr-3 text-right">MFI(14)</th>
+            <th className="py-2 pr-3">Flow</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => {
+            const m = r.mfi ?? 50;
+            const flow = m < 20 ? { text: "Money flowing OUT (oversold)", color: "text-green-400" } :
+                        m > 80 ? { text: "Money flowing IN (overbought)", color: "text-red-400" } :
+                        { text: "Neutral", color: "text-[var(--muted)]" };
+            return (
+              <tr key={r.symbol} className="border-b border-[var(--card-border)] last:border-0">
+                <td className="py-2 pr-3 font-mono font-semibold">{r.symbol}</td>
+                <td className="py-2 pr-3 text-right font-mono">${(r.price ?? 0).toFixed(2)}</td>
+                <td className="py-2 pr-3 text-right font-mono">{r.mfi != null ? r.mfi.toFixed(1) : "—"}</td>
+                <td className={`py-2 pr-3 ${flow.color}`}>{flow.text}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
+  }
   // zscore
   return (
     <table className="w-full text-sm">
@@ -354,6 +422,18 @@ function hints(tab: ScannerType) {
     <div className="space-y-1">
       <p><strong>TTM Squeeze (John Carter):</strong> Bollinger inside Keltner = volatility compression.</p>
       <p><strong>Firing</strong>: squeeze just released; momentum sign points entry direction.</p>
+    </div>
+  );
+  if (tab === "connors") return (
+    <div className="space-y-1">
+      <p><strong>Connors RSI</strong>: composite of fast RSI, streak RSI, and 100-day ROC rank.</p>
+      <p><strong>&lt; 5</strong>: deep oversold — Connors mean-reversion entry signal. <strong>&gt; 95</strong>: extreme overbought.</p>
+    </div>
+  );
+  if (tab === "mfi") return (
+    <div className="space-y-1">
+      <p><strong>Money Flow Index</strong>: volume-weighted RSI. Combines price + volume into single oscillator.</p>
+      <p><strong>&lt; 20</strong>: capitulation, potential reversal. <strong>&gt; 80</strong>: distribution, potential top.</p>
     </div>
   );
   return (
