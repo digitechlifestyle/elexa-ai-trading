@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+interface SavedView { name: string; symbols: string; scanner: string; }
+const SAVED_KEY = "elexa_scanner_views";
 
 type ScannerType = "squeeze" | "rsi" | "volume" | "zscore" | "supertrend" | "ttm" | "connors" | "mfi";
 
@@ -43,6 +46,35 @@ export default function ScannersClient() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [results, setResults] = useState<Result[]>([]);
+  const [views, setViews] = useState<SavedView[]>([]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(SAVED_KEY);
+      if (raw) setViews(JSON.parse(raw));
+    } catch { /* ignore */ }
+  }, []);
+
+  function persistViews(next: SavedView[]) {
+    setViews(next);
+    try { localStorage.setItem(SAVED_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+  }
+
+  function saveView() {
+    const name = prompt("Name this view:");
+    if (!name?.trim()) return;
+    const view: SavedView = { name: name.trim(), symbols: input, scanner: tab };
+    persistViews([...views.filter((v) => v.name !== view.name), view]);
+  }
+
+  function loadView(v: SavedView) {
+    setInput(v.symbols);
+    setTab(v.scanner as ScannerType);
+  }
+
+  function deleteView(name: string) {
+    persistViews(views.filter((v) => v.name !== name));
+  }
 
   async function run() {
     setLoading(true); setErr(null);
@@ -93,10 +125,29 @@ export default function ScannersClient() {
             </button>
           ))}
         </div>
-        <button onClick={run} disabled={loading}
-          className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-semibold">
-          {loading ? "Scanning…" : "Scan"}
-        </button>
+        <div className="flex gap-2 flex-wrap">
+          <button onClick={run} disabled={loading}
+            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-semibold">
+            {loading ? "Scanning…" : "Scan"}
+          </button>
+          <button onClick={saveView}
+            className="bg-[var(--background)] border border-[var(--card-border)] hover:border-indigo-600 text-white px-3 py-2 rounded-lg text-sm">
+            ⭐ Save view
+          </button>
+        </div>
+        {views.length > 0 && (
+          <div className="border-t border-[var(--card-border)] pt-3">
+            <p className="text-xs text-[var(--muted)] mb-2">Saved views</p>
+            <div className="flex flex-wrap gap-2">
+              {views.map((v) => (
+                <div key={v.name} className="flex items-center gap-1 bg-[var(--background)] border border-[var(--card-border)] rounded">
+                  <button onClick={() => loadView(v)} className="text-xs hover:text-indigo-400 px-3 py-1.5">{v.name}</button>
+                  <button onClick={() => deleteView(v.name)} title="Delete" className="text-xs text-red-400 hover:text-red-300 px-2 py-1.5">✕</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {err && <div className="bg-red-950 border border-red-800 text-red-300 text-sm rounded-lg px-3 py-2">{err}</div>}
       </div>
 
