@@ -57,6 +57,18 @@ const exchanges = [
     stage: "Planned connector",
   },
   {
+    name: "Bitrue",
+    markets: "Crypto assets, including XRP-focused markets where supported",
+    connection: "Read-only portfolio/watchlist connection first; restricted API keys only if later supported",
+    stage: "Planned crypto connector",
+  },
+  {
+    name: "Crypto.com",
+    markets: "Crypto assets and exchange/account research where supported",
+    connection: "Read-only or restricted API-key workflow first; no withdrawal permission",
+    stage: "Planned crypto connector",
+  },
+  {
     name: "Bitpanda",
     markets: "Crypto, stocks/ETFs and metals where supported by user account region",
     connection: "Watchlist/research integration first",
