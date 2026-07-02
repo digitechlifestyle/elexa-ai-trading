@@ -49,6 +49,21 @@ const launchSteps = [
   "Journal the decision, review results and improve your process.",
 ];
 
+const demoSteps = [
+  {
+    title: "1. Start with demo mode",
+    desc: "Explore sample markets and tools without connecting an exchange or entering API keys.",
+  },
+  {
+    title: "2. Pick your market focus",
+    desc: "Choose crypto, stocks, ETFs or a mixed dashboard during onboarding.",
+  },
+  {
+    title: "3. Add connections later",
+    desc: "Move to read-only or paper/sandbox connections only when you are ready.",
+  },
+];
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -87,10 +102,16 @@ export default async function HomePage({
 
         <div className="flex flex-wrap gap-4 justify-center">
           <Link
-            href="/dashboard"
+            href="/onboarding"
             className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
           >
-            Open Research Dashboard
+            Start in Demo Mode
+          </Link>
+          <Link
+            href="/markets"
+            className="border border-[var(--card-border)] hover:border-indigo-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+          >
+            View Markets
           </Link>
           <Link
             href="/pricing"
@@ -101,9 +122,9 @@ export default async function HomePage({
         </div>
 
         <p className="mt-6 text-xs text-[var(--muted)] max-w-2xl mx-auto">
-          Research and education only. Elexa does not provide financial advice,
-          personal investment recommendations, guaranteed returns or real-money
-          execution at launch.{" "}
+          Demo mode is the safest place to start. Research and education only.
+          Elexa does not provide financial advice, personal investment
+          recommendations, guaranteed returns or real-money execution at launch.{" "}
           <Link href="/disclaimer" className="underline hover:text-white">
             Read full disclaimer →
           </Link>
@@ -178,6 +199,45 @@ export default async function HomePage({
         </div>
       </section>
 
+      {/* Demo mode path */}
+      <section className="px-6 py-16 bg-[var(--card)] border-y border-[var(--card-border)]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-indigo-400 text-sm font-semibold mb-3">
+              Safest way to begin
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Try Elexa without exchange keys
+            </h2>
+            <p className="text-[var(--muted)] max-w-2xl mx-auto">
+              New users can start with demo data, build a watchlist and learn
+              the research workflow before connecting any platform.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {demoSteps.map((item) => (
+              <div
+                key={item.title}
+                className="bg-[var(--background)] border border-[var(--card-border)] rounded-xl p-6"
+              >
+                <h3 className="font-semibold mb-2">{item.title}</h3>
+                <p className="text-[var(--muted)] text-sm leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link
+              href="/onboarding"
+              className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+            >
+              Start Safe Setup
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Launch pillars */}
       <section className="px-6 py-20 bg-[var(--card)] border-y border-[var(--card-border)]">
         <div className="max-w-6xl mx-auto">
@@ -228,10 +288,10 @@ export default async function HomePage({
               not guaranteed profit.
             </p>
             <Link
-              href="/dashboard"
+              href="/onboarding"
               className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             >
-              Try the dashboard
+              Try Demo Setup
             </Link>
           </div>
 
@@ -306,18 +366,24 @@ export default async function HomePage({
       {/* CTA */}
       <section className="px-6 py-20 bg-indigo-950 border-y border-indigo-900 text-center">
         <h2 className="text-3xl font-bold mb-4">
-          Start with research. Test in simulation.
+          Start in demo mode. Upgrade only when ready.
         </h2>
         <p className="text-indigo-300 mb-8 max-w-2xl mx-auto">
-          Open the dashboard, build a watchlist and start testing your process
-          without connecting real funds or placing live trades.
+          Build your first watchlist, choose your market focus and test the
+          research workflow without connecting real funds or placing live trades.
         </p>
         <div className="flex flex-wrap gap-4 justify-center">
           <Link
-            href="/dashboard"
+            href="/onboarding"
             className="bg-white text-indigo-900 hover:bg-indigo-100 px-10 py-3 rounded-lg font-semibold transition-colors inline-block"
           >
-            Get Started Free
+            Start Demo Setup
+          </Link>
+          <Link
+            href="/markets"
+            className="border border-indigo-700 hover:border-indigo-400 text-white px-10 py-3 rounded-lg font-semibold transition-colors inline-block"
+          >
+            See Supported Markets
           </Link>
           <Link
             href="/pricing"
