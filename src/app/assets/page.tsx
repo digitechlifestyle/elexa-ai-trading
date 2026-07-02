@@ -19,7 +19,7 @@ const groups = [
     title: "Utility and payments tokens",
     note: "Assets often discussed around payments, settlement, interoperability, compliance, enterprise use cases or real-world utility.",
     assets: [
-      "XRP", "XLM", "HBAR", "XDC", "QNT", "SHX", "ALGO", "VET", "IOTA", "FLR", "SGB", "JASMY", "CSPR", "LCX", "CSPR", "CANTO", "CSPR", "AXL", "ZBCN", "CSPR",
+      "XRP", "XLM", "HBAR", "XDC", "QNT", "SHX", "ALGO", "VET", "IOTA", "FLR", "SGB", "JASMY", "CSPR", "LCX", "CANTO", "AXL", "ZBCN", "XRPB", "VELO", "VTHO",
     ],
   },
   {
@@ -40,7 +40,7 @@ const groups = [
     title: "Stablecoins and tokenised dollars",
     note: "Stablecoin examples for research and education. Stablecoins still carry issuer, reserve, liquidity, regulatory and de-peg risk.",
     assets: [
-      "USDT", "USDC", "RLUSD", "PYUSD", "FDUSD", "USDe", "DAI", "USDD", "TUSD", "GUSD", "FRAX", "LUSD", "USDP", "EURC", "EURT", "USDG", "USD1",
+      "USDT", "USDC", "RLUSD", "PYUSD", "FDUSD", "USDe", "DAI", "USDD", "TUSD", "GUSD", "FRAX", "LUSD", "USDP", "EURC", "EURT", "USDG", "USD1", "BUSD",
     ],
   },
   {
