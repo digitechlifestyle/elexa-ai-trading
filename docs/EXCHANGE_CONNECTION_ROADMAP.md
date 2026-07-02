@@ -83,6 +83,8 @@ Real-money execution should remain disabled until all of the following are compl
 |---|---|---|
 | Coinbase | Crypto | OAuth or restricted API keys |
 | Binance | Crypto | Restricted API keys, no withdrawals |
+| Bitrue | Crypto, XRP-focused markets where supported | Read-only/watchlist first, restricted API keys later if supported |
+| Crypto.com | Crypto | Read-only/research first, restricted API keys only with withdrawals disabled |
 | TradingView | Charts/watchlists | Research-only integration |
 
 ### Additional Options
@@ -94,7 +96,6 @@ Real-money execution should remain disabled until all of the following are compl
 | Bitget | Crypto | Advanced users only; research-first |
 | Bybit | Crypto derivatives | Research-only until reviewed |
 | OKX | Crypto | Research-first, no live execution at launch |
-| Crypto.com | Crypto | Watchlist/research option |
 | Interactive Brokers | Stocks, ETFs, options, futures, forex | Serious future option but high compliance burden |
 
 ## API Key Safety Rules
@@ -133,6 +134,6 @@ Avoid:
 3. Add read-only connection explanation.
 4. Add warning: never use withdrawal-enabled keys.
 5. Add Alpaca paper/sandbox as the first practical connection.
-6. Add Kraken/Coinbase crypto research connectors.
-7. Add TradingView chart/watchlist layer.
+6. Add Kraken, Coinbase, Bitrue and Crypto.com crypto research connectors.
+7. Add Binance and TradingView chart/watchlist layers.
 8. Only consider live execution after legal and security review.
