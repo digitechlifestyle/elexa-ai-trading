@@ -4,6 +4,19 @@ import { useMemo, useState } from "react";
 
 type Focus = "crypto" | "stocks" | "etfs" | "mixed";
 
+type DemoApiResponse = {
+  ok: boolean;
+  error?: string;
+  summary?: string;
+  symbolCount?: number;
+  primarySymbol?: string;
+  symbols?: string[];
+  researchPlan?: string[];
+  riskNotes?: string[];
+  nextAction?: string;
+  generatedAt?: string;
+};
+
 const watchlistPresets: Record<Focus, string[]> = {
   crypto: ["BTC", "ETH", "XRP", "XLM", "HBAR", "XDC", "QNT", "ADA", "SOL", "RLUSD", "USDC"],
   stocks: ["NVDA", "MSFT", "AAPL", "GOOGL", "META", "AMZN", "AMD", "PLTR", "TSM", "AVGO"],
@@ -47,14 +60,21 @@ export default function DemoClient() {
   const [customSymbol, setCustomSymbol] = useState("");
   const [riskChecked, setRiskChecked] = useState(false);
   const [simulationRun, setSimulationRun] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiResult, setApiResult] = useState<DemoApiResponse | null>(null);
 
   const researchNotes = useMemo(() => demoNotes[focus], [focus]);
+
+  function resetResult() {
+    setSimulationRun(false);
+    setApiResult(null);
+  }
 
   function changeFocus(nextFocus: Focus) {
     setFocus(nextFocus);
     setSelected(watchlistPresets[nextFocus]);
     setRiskChecked(false);
-    setSimulationRun(false);
+    resetResult();
   }
 
   function toggleAsset(asset: string) {
@@ -63,7 +83,7 @@ export default function DemoClient() {
         ? current.filter((item) => item !== asset)
         : [...current, asset]
     );
-    setSimulationRun(false);
+    resetResult();
   }
 
   function addCustomSymbol() {
@@ -71,7 +91,33 @@ export default function DemoClient() {
     if (!clean || selected.includes(clean)) return;
     setSelected((current) => [...current, clean]);
     setCustomSymbol("");
+    resetResult();
+  }
+
+  async function runBackendSimulation() {
+    setLoading(true);
     setSimulationRun(false);
+    setApiResult(null);
+
+    try {
+      const response = await fetch("/api/demo/simulation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ focus, symbols: selected }),
+      });
+
+      const data = (await response.json()) as DemoApiResponse;
+      setApiResult(data);
+      setSimulationRun(data.ok);
+    } catch {
+      setApiResult({
+        ok: false,
+        error:
+          "The backend demo API did not respond. Refresh the page after deployment finishes and try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   const sampleIdea = selected[0] ?? "BTC";
@@ -103,7 +149,7 @@ export default function DemoClient() {
         <p className="text-indigo-400 text-sm font-semibold mb-3">Step 2</p>
         <h2 className="text-2xl font-bold mb-4">Build demo watchlist</h2>
         <p className="text-[var(--muted)] text-sm mb-5">
-          Click symbols to add or remove them. This is a local browser demo only.
+          Click symbols to add or remove them. Add your own symbol, then run the backend demo simulation.
         </p>
         <div className="flex flex-wrap gap-2 mb-6">
           {watchlistPresets[focus].map((asset) => (
@@ -125,6 +171,12 @@ export default function DemoClient() {
           <input
             value={customSymbol}
             onChange={(event) => setCustomSymbol(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                addCustomSymbol();
+              }
+            }}
             placeholder="Add symbol, e.g. RLUSD, SHX, MSTR"
             className="flex-1 rounded-lg border border-[var(--card-border)] bg-[var(--background)] px-4 py-3 text-sm text-white outline-none focus:border-indigo-600"
           />
@@ -135,6 +187,16 @@ export default function DemoClient() {
           >
             Add Symbol
           </button>
+        </div>
+        <div className="mt-5">
+          <p className="text-sm font-semibold mb-2">Current demo watchlist</p>
+          <div className="flex flex-wrap gap-2">
+            {selected.map((asset) => (
+              <span key={asset} className="text-xs bg-indigo-950 border border-indigo-800 rounded-full px-3 py-1 text-indigo-200">
+                {asset}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -157,7 +219,7 @@ export default function DemoClient() {
 
         <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-6">
           <p className="text-indigo-400 text-sm font-semibold mb-3">Step 4</p>
-          <h2 className="text-2xl font-bold mb-4">Risk check</h2>
+          <h2 className="text-2xl font-bold mb-4">Backend risk check</h2>
           <label className="flex gap-3 text-sm text-[var(--muted)] mb-5 cursor-pointer">
             <input
               type="checkbox"
@@ -172,39 +234,57 @@ export default function DemoClient() {
           </label>
           <button
             type="button"
-            disabled={!riskChecked || selected.length === 0}
-            onClick={() => setSimulationRun(true)}
+            disabled={!riskChecked || selected.length === 0 || loading}
+            onClick={runBackendSimulation}
             className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors"
           >
-            Run Demo Simulation
+            {loading ? "Running Backend Demo..." : "Run Backend Demo Simulation"}
           </button>
+          {!riskChecked && (
+            <p className="text-amber-300 text-xs mt-3">
+              Tick the risk checkbox before running the backend demo.
+            </p>
+          )}
         </div>
       </section>
 
       <section className="bg-indigo-950 border border-indigo-800 rounded-2xl p-8">
-        <h2 className="text-2xl font-bold mb-4">Demo output</h2>
-        {simulationRun ? (
-          <div className="space-y-4 text-sm text-indigo-200 leading-relaxed">
-            <p>
-              Demo simulation complete for <strong>{selected.length}</strong> watchlist symbols.
-            </p>
-            <p>
-              Example conclusion: continue research, compare risk across symbols,
-              avoid live execution, and only use read-only or paper/sandbox
-              connections when ready.
-            </p>
+        <h2 className="text-2xl font-bold mb-4">Backend demo output</h2>
+        {apiResult?.ok ? (
+          <div className="space-y-5 text-sm text-indigo-200 leading-relaxed">
+            <p>{apiResult.summary}</p>
+            <div>
+              <p className="font-semibold text-white mb-2">Research plan</p>
+              <ul className="space-y-2">
+                {apiResult.researchPlan?.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="font-semibold text-white mb-2">Risk notes</p>
+              <ul className="space-y-2">
+                {apiResult.riskNotes?.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
+            </div>
+            <p className="text-amber-200">{apiResult.nextAction}</p>
             <div className="flex flex-wrap gap-2 pt-2">
-              {selected.map((asset) => (
+              {apiResult.symbols?.map((asset) => (
                 <span key={asset} className="text-xs bg-indigo-900 border border-indigo-700 rounded-full px-3 py-1">
                   {asset}
                 </span>
               ))}
             </div>
           </div>
+        ) : apiResult?.error ? (
+          <p className="text-amber-300 text-sm leading-relaxed">{apiResult.error}</p>
+        ) : simulationRun ? (
+          <p className="text-indigo-300 text-sm leading-relaxed">Backend simulation complete.</p>
         ) : (
           <p className="text-indigo-300 text-sm leading-relaxed">
-            Select a focus, build your watchlist, confirm the risk warning and
-            run the demo simulation. No data is saved and no account is required.
+            Add symbols, confirm the risk warning and run the backend demo simulation.
           </p>
         )}
       </section>
