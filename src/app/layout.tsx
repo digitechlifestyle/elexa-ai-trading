@@ -43,6 +43,7 @@ const publicNav = [
   { href: "/beginner-guide", label: "Beginner Guide" },
   { href: "/how-it-works", label: "How It Works" },
   { href: "/features", label: "Features" },
+  { href: "/assets", label: "Assets" },
   { href: "/markets", label: "Markets" },
   { href: "/roadmap", label: "Roadmap" },
   { href: "/faq", label: "FAQ" },
@@ -138,6 +139,9 @@ export default function RootLayout({
               </a>
               <a href="/features" className="hover:text-white underline font-semibold text-indigo-300">
                 Features
+              </a>
+              <a href="/assets" className="hover:text-white underline font-semibold text-indigo-300">
+                Assets
               </a>
               <a href="/roadmap" className="hover:text-white underline font-semibold text-indigo-300">
                 Roadmap
