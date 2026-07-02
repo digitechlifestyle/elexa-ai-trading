@@ -178,6 +178,7 @@ const groups: NavGroup[] = [
     emoji: "⚙️",
     items: [
       { href: "/dashboard/settings", label: "Settings", icon: "⚙️" },
+      { href: "/dashboard/connections", label: "Connections", icon: "🔌" },
       { href: "/dashboard/api-keys", label: "API Keys", icon: "🔑" },
       { href: "/dashboard/webhooks", label: "Webhooks", icon: "📡" },
       { href: "/dashboard/export", label: "Export CSV", icon: "📤" },
