@@ -75,6 +75,7 @@ Real-money execution should remain disabled until all of the following are compl
 | Platform | Market Type | Safer Launch Use |
 |---|---|---|
 | Alpaca | Stocks, ETFs, selected crypto | Paper/sandbox simulation |
+| TradingView | Charts, watchlists, indicators | Research layer only |
 | Kraken | Crypto | Research and simulation |
 
 ### Next Priority
@@ -83,19 +84,20 @@ Real-money execution should remain disabled until all of the following are compl
 |---|---|---|
 | Coinbase | Crypto | OAuth or restricted API keys |
 | Binance | Crypto | Restricted API keys, no withdrawals |
+| Bitget | Crypto spot, copy-trading context, derivatives research | Read-only/watchlist first, derivatives research-only |
+| Bybit | Crypto spot and derivatives research | Read-only/research first, no live derivatives execution |
+| OKX | Crypto spot, Web3 and derivatives research | Restricted/read-only keys, no withdrawals |
+| BYDFi | Crypto spot, copy-trading and derivatives research | Research-only first, no copy-trading automation at launch |
 | Bitrue | Crypto, XRP-focused markets where supported | Read-only/watchlist first, restricted API keys later if supported |
 | Crypto.com | Crypto | Read-only/research first, restricted API keys only with withdrawals disabled |
-| TradingView | Charts/watchlists | Research-only integration |
 
 ### Additional Options
 
 | Platform | Market Type | Notes |
 |---|---|---|
+| Robinhood | Retail stocks, ETFs, options and crypto where regionally available | Familiar retail investing context; research/watchlist first |
 | Bitpanda | Crypto, stocks/ETFs, metals | Useful for UK/EU style asset coverage |
 | Uphold | Crypto and multi-asset | Useful for portfolio/watchlist import if available |
-| Bitget | Crypto | Advanced users only; research-first |
-| Bybit | Crypto derivatives | Research-only until reviewed |
-| OKX | Crypto | Research-first, no live execution at launch |
 | Interactive Brokers | Stocks, ETFs, options, futures, forex | Serious future option but high compliance burden |
 
 ## API Key Safety Rules
@@ -134,6 +136,7 @@ Avoid:
 3. Add read-only connection explanation.
 4. Add warning: never use withdrawal-enabled keys.
 5. Add Alpaca paper/sandbox as the first practical connection.
-6. Add Kraken, Coinbase, Bitrue and Crypto.com crypto research connectors.
-7. Add Binance and TradingView chart/watchlist layers.
-8. Only consider live execution after legal and security review.
+6. Add TradingView chart/watchlist research layer.
+7. Add read-only crypto portfolio/watchlist connectors for Kraken, Coinbase, Binance, Bitget, Bybit, OKX, BYDFi, Bitrue and Crypto.com.
+8. Add Robinhood, Bitpanda, Uphold and Interactive Brokers as later research/watchlist options.
+9. Only consider live execution after legal and security review.
