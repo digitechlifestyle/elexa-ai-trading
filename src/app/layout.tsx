@@ -42,6 +42,7 @@ const RISK_BANNER =
 const publicNav = [
   { href: "/features", label: "Features" },
   { href: "/markets", label: "Markets" },
+  { href: "/roadmap", label: "Roadmap" },
   { href: "/faq", label: "FAQ" },
   { href: "/trust", label: "Trust & Safety" },
   { href: "/pricing", label: "Pricing" },
@@ -129,6 +130,9 @@ export default function RootLayout({
               </a>
               <a href="/features" className="hover:text-white underline font-semibold text-indigo-300">
                 Features
+              </a>
+              <a href="/roadmap" className="hover:text-white underline font-semibold text-indigo-300">
+                Roadmap
               </a>
               <a href="/faq" className="hover:text-white underline font-semibold text-indigo-300">
                 FAQ
