@@ -40,6 +40,7 @@ const RISK_BANNER =
   "IMPORTANT: Elexa AI Trading is a research, education, journaling and simulation platform. It is NOT financial advice. Launch mode does not place real-money trades. All trading involves substantial risk of loss.";
 
 const publicNav = [
+  { href: "/how-it-works", label: "How It Works" },
   { href: "/features", label: "Features" },
   { href: "/markets", label: "Markets" },
   { href: "/roadmap", label: "Roadmap" },
@@ -127,6 +128,9 @@ export default function RootLayout({
             <div className="flex flex-wrap gap-4 pt-2">
               <a href="/guide" className="hover:text-white underline">
                 User Guide
+              </a>
+              <a href="/how-it-works" className="hover:text-white underline font-semibold text-indigo-300">
+                How It Works
               </a>
               <a href="/features" className="hover:text-white underline font-semibold text-indigo-300">
                 Features
