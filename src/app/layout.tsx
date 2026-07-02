@@ -95,6 +95,9 @@ export default function RootLayout({
               <a href="/markets" className="hover:text-white underline">
                 Markets &amp; Connections
               </a>
+              <a href="/trust" className="hover:text-white underline font-semibold text-indigo-300">
+                Trust &amp; Safety
+              </a>
               <a href="/legal" className="hover:text-white underline font-semibold text-amber-300">
                 Legal &amp; Liability
               </a>
