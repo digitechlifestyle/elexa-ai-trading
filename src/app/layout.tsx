@@ -94,7 +94,7 @@ export default function RootLayout({
                 Dashboard
               </a>
               <a
-                href="/onboarding"
+                href="/demo"
                 className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
               >
                 Start Demo
@@ -142,6 +142,9 @@ export default function RootLayout({
               </a>
               <a href="/assets" className="hover:text-white underline font-semibold text-indigo-300">
                 Assets
+              </a>
+              <a href="/demo" className="hover:text-white underline font-semibold text-indigo-300">
+                Demo
               </a>
               <a href="/roadmap" className="hover:text-white underline font-semibold text-indigo-300">
                 Roadmap
