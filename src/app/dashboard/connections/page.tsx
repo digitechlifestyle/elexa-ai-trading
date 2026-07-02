@@ -42,6 +42,16 @@ const connections: ConnectionCard[] = [
     href: "/dashboard/api-keys",
   },
   {
+    name: "TradingView",
+    badge: "Charts and watchlists",
+    markets: "Charts, watchlists, indicators and market context",
+    mode: "Research layer only",
+    status: "Planned",
+    description:
+      "High-priority research layer for charting, watchlists and technical context. This should not be used for order execution in launch mode.",
+    cta: "Planned",
+  },
+  {
     name: "Kraken Research",
     badge: "Crypto",
     markets: "Crypto assets",
@@ -72,6 +82,46 @@ const connections: ConnectionCard[] = [
     cta: "Coming Soon",
   },
   {
+    name: "Bitget",
+    badge: "Popular crypto exchange",
+    markets: "Crypto spot, copy-trading context and derivatives research",
+    mode: "Research-only or restricted API-key mode first",
+    status: "Planned",
+    description:
+      "Planned crypto connector for users who want Bitget watchlists, portfolio context and research workflows. Derivatives should remain research-only at launch.",
+    cta: "Coming Soon",
+  },
+  {
+    name: "Bybit",
+    badge: "Popular crypto exchange",
+    markets: "Crypto spot and derivatives research",
+    mode: "Read-only/research first; no live derivatives execution",
+    status: "Planned",
+    description:
+      "Planned crypto connector. Because derivatives are high risk, Bybit should be used for market research and watchlists first.",
+    cta: "Coming Soon",
+  },
+  {
+    name: "OKX",
+    badge: "Popular crypto exchange",
+    markets: "Crypto spot, Web3 and derivatives research",
+    mode: "Research-only or restricted API-key mode first",
+    status: "Planned",
+    description:
+      "Planned connector for crypto market research, watchlists and portfolio context. Live execution should remain disabled at launch.",
+    cta: "Coming Soon",
+  },
+  {
+    name: "BYDFi",
+    badge: "Crypto trading platform",
+    markets: "Crypto spot, copy-trading and derivatives research",
+    mode: "Research-only first; no live copy-trading automation",
+    status: "Planned",
+    description:
+      "Planned connector for users interested in BYDFi market research and crypto watchlists. Copy-trading and derivatives features should stay research-only in launch mode.",
+    cta: "Coming Soon",
+  },
+  {
     name: "Bitrue",
     badge: "XRP-focused crypto",
     markets: "Crypto assets including XRP-focused markets where supported",
@@ -90,6 +140,16 @@ const connections: ConnectionCard[] = [
     description:
       "Planned connector for crypto research and portfolio context. Withdrawal-enabled keys must not be used.",
     cta: "Coming Soon",
+  },
+  {
+    name: "Robinhood",
+    badge: "Retail stocks and crypto",
+    markets: "Stocks, ETFs, options and crypto where regionally available",
+    mode: "Research/watchlist layer first",
+    status: "Roadmap",
+    description:
+      "Roadmap option for users who want familiar retail investing context. Options and live trading should not be enabled at launch.",
+    cta: "Roadmap",
   },
   {
     name: "Bitpanda",
@@ -112,13 +172,13 @@ const connections: ConnectionCard[] = [
     cta: "Roadmap",
   },
   {
-    name: "TradingView",
-    badge: "Charts",
-    markets: "Charts, watchlists and market context",
-    mode: "Research layer only",
+    name: "Interactive Brokers",
+    badge: "Professional markets",
+    markets: "Stocks, ETFs, options, futures and forex where supported",
+    mode: "Research/watchlist first; high compliance burden",
     status: "Roadmap",
     description:
-      "Charting and watchlist integration option. This should not be used for order execution in launch mode.",
+      "Serious future option for broad market coverage, but it requires more legal, security and compliance review before any execution workflow.",
     cta: "Roadmap",
   },
 ];
@@ -231,7 +291,8 @@ export default function ConnectionsPage() {
         <ol className="list-decimal list-inside space-y-2 text-[var(--muted)] text-sm leading-relaxed">
           <li>Use Demo Mode first so every user can explore without keys.</li>
           <li>Use Alpaca Paper for simulated stock, ETF and crypto workflows.</li>
-          <li>Add read-only crypto portfolio/watchlist connectors next.</li>
+          <li>Add TradingView charts/watchlists as the research layer.</li>
+          <li>Add read-only crypto portfolio/watchlist connectors for Kraken, Coinbase, Binance, Bitget, Bybit, OKX, BYDFi, Bitrue and Crypto.com.</li>
           <li>Keep all live execution disabled until legal and security review is complete.</li>
         </ol>
       </section>
