@@ -39,6 +39,13 @@ export const viewport = {
 const RISK_BANNER =
   "IMPORTANT: Elexa AI Trading is a research, education, journaling and simulation platform. It is NOT financial advice. Launch mode does not place real-money trades. All trading involves substantial risk of loss.";
 
+const publicNav = [
+  { href: "/markets", label: "Markets" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/trust", label: "Trust & Safety" },
+  { href: "/pricing", label: "Pricing" },
+];
+
 export default function RootLayout({
   children,
 }: {
@@ -63,6 +70,33 @@ export default function RootLayout({
           <strong className="text-amber-400">RISK DISCLOSURE: </strong>
           {RISK_BANNER}
         </div>
+
+        <header className="sticky top-0 z-40 border-b border-[var(--card-border)] bg-[var(--background)]/95 backdrop-blur px-6 py-4">
+          <div className="max-w-6xl mx-auto flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <a href="/" className="text-lg font-bold text-indigo-400">
+              Elexa AI Trading
+            </a>
+            <nav className="flex flex-wrap items-center gap-4 text-sm text-[var(--muted)]">
+              {publicNav.map((item) => (
+                <a key={item.href} href={item.href} className="hover:text-white transition-colors">
+                  {item.label}
+                </a>
+              ))}
+              <a
+                href="/dashboard"
+                className="hover:text-white transition-colors"
+              >
+                Dashboard
+              </a>
+              <a
+                href="/onboarding"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+              >
+                Start Demo
+              </a>
+            </nav>
+          </div>
+        </header>
 
         <main className="flex-1">{children}</main>
 
