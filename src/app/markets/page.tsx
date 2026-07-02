@@ -39,6 +39,12 @@ const exchanges = [
     stage: "Core launch connector",
   },
   {
+    name: "TradingView",
+    markets: "Charts, watchlists, indicators and market context",
+    connection: "Charting and watchlist integration, not order execution",
+    stage: "High-priority research layer",
+  },
+  {
     name: "Kraken",
     markets: "Crypto assets",
     connection: "Read-only and paper/simulation workflow first",
@@ -57,6 +63,30 @@ const exchanges = [
     stage: "Planned connector",
   },
   {
+    name: "Bitget",
+    markets: "Crypto spot, copy-trading context and derivatives research",
+    connection: "Research-only or restricted API-key mode first",
+    stage: "Planned crypto connector",
+  },
+  {
+    name: "Bybit",
+    markets: "Crypto spot and derivatives research",
+    connection: "Read-only/research first; no live derivatives execution at launch",
+    stage: "Planned crypto connector",
+  },
+  {
+    name: "OKX",
+    markets: "Crypto spot, Web3 and derivatives research",
+    connection: "Research-only or restricted API-key mode first",
+    stage: "Planned crypto connector",
+  },
+  {
+    name: "BYDFi",
+    markets: "Crypto spot, copy-trading and derivatives research",
+    connection: "Research-only first; no live copy-trading automation at launch",
+    stage: "Planned crypto connector",
+  },
+  {
     name: "Bitrue",
     markets: "Crypto assets, including XRP-focused markets where supported",
     connection: "Read-only portfolio/watchlist connection first; restricted API keys only if later supported",
@@ -67,6 +97,12 @@ const exchanges = [
     markets: "Crypto assets and exchange/account research where supported",
     connection: "Read-only or restricted API-key workflow first; no withdrawal permission",
     stage: "Planned crypto connector",
+  },
+  {
+    name: "Robinhood",
+    markets: "Retail stocks, ETFs, options and crypto where regionally available",
+    connection: "Research/watchlist layer first; no live execution at launch",
+    stage: "Roadmap option",
   },
   {
     name: "Bitpanda",
@@ -81,16 +117,10 @@ const exchanges = [
     stage: "Roadmap option",
   },
   {
-    name: "Bitget / Bybit / OKX",
-    markets: "Crypto spot and derivatives research",
-    connection: "Research-only or restricted API-key mode first",
+    name: "Interactive Brokers",
+    markets: "Stocks, ETFs, options, futures and forex where supported",
+    connection: "Research/watchlist first; high compliance burden",
     stage: "Advanced roadmap option",
-  },
-  {
-    name: "TradingView",
-    markets: "Charts, watchlists and market context",
-    connection: "Charting and watchlist integration, not order execution",
-    stage: "Research layer option",
   },
 ];
 
