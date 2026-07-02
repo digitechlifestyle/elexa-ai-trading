@@ -1,13 +1,97 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const RISK_PRESETS = [
+type MarketFocus = "mixed" | "crypto" | "stocks" | "etfs";
+type ExperienceLevel = "beginner" | "intermediate" | "advanced";
+type ConnectionMode = "demo" | "read_only" | "paper";
+
+const MARKET_FOCUS: Array<{
+  id: MarketFocus;
+  name: string;
+  desc: string;
+  icon: string;
+}> = [
   {
+    id: "mixed",
+    name: "Mixed markets",
+    desc: "Stocks, ETFs, crypto and commodity-linked ETFs in one research workflow.",
+    icon: "🌍",
+  },
+  {
+    id: "crypto",
+    name: "Crypto assets",
+    desc: "BTC, ETH, XRP, SOL, stablecoins and exchange watchlists.",
+    icon: "🪙",
+  },
+  {
+    id: "stocks",
+    name: "Stocks",
+    desc: "Large-cap shares, AI names, tech stocks and market leaders.",
+    icon: "📈",
+  },
+  {
+    id: "etfs",
+    name: "ETFs and commodities",
+    desc: "Broad ETFs plus GLD, SLV, USO and other market exposure symbols.",
+    icon: "⚖️",
+  },
+];
+
+const EXPERIENCE_LEVELS: Array<{
+  id: ExperienceLevel;
+  name: string;
+  desc: string;
+}> = [
+  {
+    id: "beginner",
+    name: "Beginner",
+    desc: "Best for learning the dashboard with lower simulated risk and more guidance.",
+  },
+  {
+    id: "intermediate",
+    name: "Intermediate",
+    desc: "Best for users who already understand basic market orders and risk control.",
+  },
+  {
+    id: "advanced",
+    name: "Advanced",
+    desc: "Best for experienced users who want broader tools, scanners and deeper analysis.",
+  },
+];
+
+const CONNECTION_MODES: Array<{
+  id: ConnectionMode;
+  name: string;
+  desc: string;
+  safeNote: string;
+}> = [
+  {
+    id: "demo",
+    name: "Demo mode",
+    desc: "Explore Elexa with sample data and no exchange connection.",
+    safeNote: "Safest start — no keys required.",
+  },
+  {
+    id: "read_only",
+    name: "Read-only connection",
+    desc: "Use exchange data for balances, watchlists and research context only.",
+    safeNote: "No withdrawals, no transfers, no live orders.",
+  },
+  {
+    id: "paper",
+    name: "Paper / sandbox mode",
+    desc: "Use sandbox or paper-trading keys where supported, starting with Alpaca Paper.",
+    safeNote: "Simulation first — no real-money execution at launch.",
+  },
+];
+
+const RISK_PRESETS = {
+  beginner: {
     id: "conservative",
     name: "Conservative",
-    desc: "Smaller trades, tight stops. Best for learning.",
+    desc: "Smaller simulated trades, lower daily loss limits and tighter stops.",
     limits: {
       max_position_size_usd: 1000,
       max_daily_loss_usd: 200,
@@ -15,10 +99,10 @@ const RISK_PRESETS = [
       stop_loss_pct: 3,
     },
   },
-  {
+  intermediate: {
     id: "balanced",
-    name: "Balanced (recommended)",
-    desc: "Default risk profile. Same as the system defaults.",
+    name: "Balanced",
+    desc: "Default simulated risk profile for most users.",
     limits: {
       max_position_size_usd: 5000,
       max_daily_loss_usd: 500,
@@ -26,112 +110,120 @@ const RISK_PRESETS = [
       stop_loss_pct: 5,
     },
   },
-  {
-    id: "aggressive",
-    name: "Aggressive",
-    desc: "Larger trades, wider stops. For experienced traders.",
+  advanced: {
+    id: "advanced-research",
+    name: "Advanced research",
+    desc: "Larger simulated limits for experienced users, still not real-money execution.",
     limits: {
-      max_position_size_usd: 15000,
-      max_daily_loss_usd: 1500,
-      max_open_positions: 20,
-      stop_loss_pct: 10,
+      max_position_size_usd: 10000,
+      max_daily_loss_usd: 1000,
+      max_open_positions: 15,
+      stop_loss_pct: 8,
     },
   },
-];
+};
 
-const WATCHLIST_PRESETS = [
-  { label: "Tech stocks", symbols: ["AAPL", "MSFT", "NVDA", "GOOGL"] },
-  { label: "Big crypto", symbols: ["BTC", "ETH", "SOL", "XRP"] },
-  { label: "Commodities", symbols: ["GLD", "SLV", "USO"] },
-  { label: "Meme coins", symbols: ["DOGE", "SHIB", "PEPE"] },
-];
+const WATCHLIST_PRESETS: Record<MarketFocus, Array<{ label: string; symbols: string[] }>> = {
+  mixed: [
+    { label: "AI + tech", symbols: ["AAPL", "MSFT", "NVDA", "GOOGL"] },
+    { label: "Major crypto", symbols: ["BTC", "ETH", "XRP", "SOL"] },
+    { label: "ETF exposure", symbols: ["SPY", "QQQ", "GLD", "SLV"] },
+  ],
+  crypto: [
+    { label: "Major crypto", symbols: ["BTC", "ETH", "XRP", "SOL"] },
+    { label: "Utility crypto", symbols: ["ADA", "HBAR", "XLM", "XDC"] },
+    { label: "High-risk crypto watch", symbols: ["DOGE", "SHIB", "PEPE", "BONK"] },
+    { label: "Stablecoins", symbols: ["USDT", "USDC"] },
+  ],
+  stocks: [
+    { label: "Tech leaders", symbols: ["AAPL", "MSFT", "NVDA", "GOOGL"] },
+    { label: "Growth names", symbols: ["TSLA", "AMD", "META", "AMZN"] },
+    { label: "Market ETFs", symbols: ["SPY", "QQQ", "DIA", "IWM"] },
+  ],
+  etfs: [
+    { label: "Core ETFs", symbols: ["SPY", "QQQ", "DIA", "IWM"] },
+    { label: "Commodity-linked", symbols: ["GLD", "SLV", "USO", "UNG"] },
+    { label: "Crypto proxy", symbols: ["BTC", "ETH"] },
+  ],
+};
 
 const STEPS = [
   "Welcome",
-  "Risk profile",
+  "Market focus",
+  "Experience",
+  "Connection",
   "Watchlist",
-  "First trade",
   "Done",
 ] as const;
 
 export default function OnboardingWizard({ email }: { email: string }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [risk, setRisk] = useState<typeof RISK_PRESETS[0] | null>(null);
+  const [marketFocus, setMarketFocus] = useState<MarketFocus | null>(null);
+  const [experience, setExperience] = useState<ExperienceLevel | null>(null);
+  const [connectionMode, setConnectionMode] = useState<ConnectionMode | null>(null);
   const [watchSymbols, setWatchSymbols] = useState<string[]>([]);
-  const [tradeStatus, setTradeStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const risk = experience ? RISK_PRESETS[experience] : null;
+  const watchlistGroups = useMemo(
+    () => WATCHLIST_PRESETS[marketFocus ?? "mixed"],
+    [marketFocus]
+  );
+  const availableSymbols = useMemo(
+    () => Array.from(new Set(watchlistGroups.flatMap((p) => p.symbols))),
+    [watchlistGroups]
+  );
+
+  function toggleSymbol(sym: string) {
+    setWatchSymbols((prev) =>
+      prev.includes(sym) ? prev.filter((s) => s !== sym) : [...prev, sym]
+    );
+  }
+
+  function chooseMarket(focus: MarketFocus) {
+    setMarketFocus(focus);
+    setWatchSymbols([]);
+  }
 
   async function applyRisk() {
     if (!risk) return;
-    setBusy(true);
-    try {
-      await fetch("/api/settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(risk.limits),
-      });
-    } finally {
-      setBusy(false);
-    }
+    await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(risk.limits),
+    });
   }
 
   async function applyWatchlist() {
-    setBusy(true);
-    try {
-      for (const sym of watchSymbols) {
-        await fetch("/api/watchlist", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ symbol: sym }),
-        });
-      }
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function placePractice() {
-    setBusy(true);
-    setTradeStatus(null);
-    try {
-      const res = await fetch("/api/trading/paper", {
+    for (const sym of watchSymbols) {
+      await fetch("/api/watchlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          exchange: "alpaca",
-          symbol: "AAPL",
-          qty: 1,
-          side: "buy",
-        }),
+        body: JSON.stringify({ symbol: sym }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setTradeStatus("✓ Practice trade submitted — 1 share of AAPL");
-      } else {
-        setTradeStatus(`⚠ ${data.error ?? "Failed"}`);
-      }
-    } catch {
-      setTradeStatus("⚠ Network error");
-    } finally {
-      setBusy(false);
     }
   }
 
   async function finish() {
     setBusy(true);
     try {
+      await applyRisk();
+      if (watchSymbols.length > 0) await applyWatchlist();
       await fetch("/api/onboarding/complete", { method: "POST" });
-      router.push("/dashboard");
+
+      if (connectionMode === "read_only" || connectionMode === "paper") {
+        router.push("/dashboard/connections");
+      } else {
+        router.push("/dashboard");
+      }
       router.refresh();
     } finally {
       setBusy(false);
     }
   }
 
-  async function next() {
-    if (step === 1 && risk) await applyRisk();
-    if (step === 2 && watchSymbols.length > 0) await applyWatchlist();
+  function next() {
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
 
@@ -139,163 +231,221 @@ export default function OnboardingWizard({ email }: { email: string }) {
     setStep((s) => Math.max(s - 1, 0));
   }
 
+  const canContinue =
+    step === 0 ||
+    (step === 1 && !!marketFocus) ||
+    (step === 2 && !!experience) ||
+    (step === 3 && !!connectionMode) ||
+    (step === 4 && watchSymbols.length >= 3);
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-2xl bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-8">
-        {/* Stepper */}
+      <div className="w-full max-w-3xl bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-8">
         <div className="flex items-center justify-between mb-8 text-xs">
           {STEPS.map((s, i) => (
             <div key={s} className="flex-1 flex items-center">
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center font-bold ${
-                  i <= step ? "bg-indigo-600 text-white" : "bg-[var(--background)] text-[var(--muted)]"
+                  i <= step
+                    ? "bg-indigo-600 text-white"
+                    : "bg-[var(--background)] text-[var(--muted)]"
                 }`}
               >
                 {i + 1}
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-2 ${i < step ? "bg-indigo-600" : "bg-[var(--card-border)]"}`} />
+                <div
+                  className={`flex-1 h-0.5 mx-2 ${
+                    i < step ? "bg-indigo-600" : "bg-[var(--card-border)]"
+                  }`}
+                />
               )}
             </div>
           ))}
         </div>
 
-        {/* Step 0 — Welcome */}
         {step === 0 && (
           <div className="space-y-5 text-center">
             <div className="text-5xl">👋</div>
             <h1 className="text-2xl font-bold">Welcome to Elexa</h1>
             <p className="text-[var(--muted)]">
-              Signed in as <span className="font-medium">{email}</span>. Three quick steps to get you trading.
+              Signed in as <span className="font-medium">{email}</span>. Let&apos;s set up a safe research dashboard.
             </p>
-            <ul className="text-left text-sm text-[var(--muted)] max-w-md mx-auto space-y-2">
-              <li>1. Pick a risk profile (you can change later)</li>
-              <li>2. Build your watchlist (3–10 symbols)</li>
-              <li>3. Place a practice paper trade</li>
-            </ul>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-left text-sm">
+              <div className="bg-[var(--background)] border border-[var(--card-border)] rounded-xl p-4">
+                <p className="font-semibold mb-1">1. Choose markets</p>
+                <p className="text-[var(--muted)]">Stocks, crypto, ETFs or a mixed dashboard.</p>
+              </div>
+              <div className="bg-[var(--background)] border border-[var(--card-border)] rounded-xl p-4">
+                <p className="font-semibold mb-1">2. Choose connection</p>
+                <p className="text-[var(--muted)]">Demo, read-only or paper/sandbox mode.</p>
+              </div>
+              <div className="bg-[var(--background)] border border-[var(--card-border)] rounded-xl p-4">
+                <p className="font-semibold mb-1">3. Build watchlist</p>
+                <p className="text-[var(--muted)]">Start with at least 3 symbols.</p>
+              </div>
+            </div>
+            <p className="text-xs text-amber-300 bg-amber-950 border border-amber-800 rounded-lg p-3">
+              Launch mode is for research, journaling and simulated strategy testing only. No real-money execution.
+            </p>
           </div>
         )}
 
-        {/* Step 1 — Risk profile */}
         {step === 1 && (
           <div className="space-y-4">
-            <h1 className="text-2xl font-bold">Pick a risk profile</h1>
+            <h1 className="text-2xl font-bold">Choose your market focus</h1>
             <p className="text-[var(--muted)] text-sm">
-              Hard limits enforced server-side on every order. You can adjust them anytime in Settings.
+              This controls your starter watchlist and the first tools we recommend.
             </p>
-            <div className="space-y-3">
-              {RISK_PRESETS.map((p) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {MARKET_FOCUS.map((focus) => (
                 <button
-                  key={p.id}
-                  onClick={() => setRisk(p)}
-                  className={`block w-full text-left border rounded-xl p-4 transition-colors ${
-                    risk?.id === p.id
+                  key={focus.id}
+                  onClick={() => chooseMarket(focus.id)}
+                  className={`text-left border rounded-xl p-4 transition-colors ${
+                    marketFocus === focus.id
                       ? "border-indigo-500 bg-indigo-950"
                       : "border-[var(--card-border)] hover:border-indigo-700"
                   }`}
                 >
-                  <p className="font-semibold">{p.name}</p>
-                  <p className="text-xs text-[var(--muted)] mt-1">{p.desc}</p>
-                  <p className="text-xs text-[var(--muted)] mt-2">
-                    Max position ${p.limits.max_position_size_usd} · Daily loss ${p.limits.max_daily_loss_usd} · Stop {p.limits.stop_loss_pct}%
+                  <p className="font-semibold text-lg">
+                    <span className="mr-2">{focus.icon}</span>
+                    {focus.name}
                   </p>
+                  <p className="text-xs text-[var(--muted)] mt-2">{focus.desc}</p>
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* Step 2 — Watchlist */}
         {step === 2 && (
           <div className="space-y-4">
-            <h1 className="text-2xl font-bold">Build your watchlist</h1>
+            <h1 className="text-2xl font-bold">Choose your experience level</h1>
             <p className="text-[var(--muted)] text-sm">
-              Pick at least 3 symbols. You can add more later.
+              Elexa will set a starter simulated risk profile from this. You can change it later.
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {WATCHLIST_PRESETS.flatMap((p) => p.symbols).map((sym) => {
-                const selected = watchSymbols.includes(sym);
+            <div className="space-y-3">
+              {EXPERIENCE_LEVELS.map((level) => {
+                const preset = RISK_PRESETS[level.id];
                 return (
                   <button
-                    key={sym}
-                    onClick={() =>
-                      setWatchSymbols((prev) =>
-                        prev.includes(sym) ? prev.filter((s) => s !== sym) : [...prev, sym]
-                      )
-                    }
-                    className={`py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${
-                      selected
-                        ? "bg-indigo-600 border-indigo-500 text-white"
-                        : "border-[var(--card-border)] text-[var(--muted)] hover:border-indigo-700"
+                    key={level.id}
+                    onClick={() => setExperience(level.id)}
+                    className={`block w-full text-left border rounded-xl p-4 transition-colors ${
+                      experience === level.id
+                        ? "border-indigo-500 bg-indigo-950"
+                        : "border-[var(--card-border)] hover:border-indigo-700"
                     }`}
                   >
-                    {sym}
+                    <p className="font-semibold">{level.name}</p>
+                    <p className="text-xs text-[var(--muted)] mt-1">{level.desc}</p>
+                    <p className="text-xs text-[var(--muted)] mt-2">
+                      Starter profile: {preset.name} · Max simulated position ${preset.limits.max_position_size_usd} · Daily loss ${preset.limits.max_daily_loss_usd}
+                    </p>
                   </button>
                 );
               })}
             </div>
-            <p className="text-xs text-[var(--muted)]">
-              {watchSymbols.length === 0
-                ? "Pick some above ↑"
-                : `${watchSymbols.length} selected · ${watchSymbols.join(", ")}`}
-            </p>
           </div>
         )}
 
-        {/* Step 3 — First trade */}
         {step === 3 && (
           <div className="space-y-4">
-            <h1 className="text-2xl font-bold">Place a practice trade</h1>
+            <h1 className="text-2xl font-bold">Choose your connection mode</h1>
             <p className="text-[var(--muted)] text-sm">
-              We&apos;ll place a 1-share AAPL buy order — paper only, no real money. This proves your account works end-to-end.
+              Start safely. You can add more exchange options from the Connections page later.
             </p>
-            <div className="bg-[var(--background)] border border-[var(--card-border)] rounded-xl p-4 space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-[var(--muted)]">Exchange</span><span>Alpaca</span></div>
-              <div className="flex justify-between"><span className="text-[var(--muted)]">Symbol</span><span>AAPL</span></div>
-              <div className="flex justify-between"><span className="text-[var(--muted)]">Quantity</span><span>1 share</span></div>
-              <div className="flex justify-between"><span className="text-[var(--muted)]">Side</span><span className="text-green-400">BUY</span></div>
+            <div className="space-y-3">
+              {CONNECTION_MODES.map((mode) => (
+                <button
+                  key={mode.id}
+                  onClick={() => setConnectionMode(mode.id)}
+                  className={`block w-full text-left border rounded-xl p-4 transition-colors ${
+                    connectionMode === mode.id
+                      ? "border-indigo-500 bg-indigo-950"
+                      : "border-[var(--card-border)] hover:border-indigo-700"
+                  }`}
+                >
+                  <p className="font-semibold">{mode.name}</p>
+                  <p className="text-xs text-[var(--muted)] mt-1">{mode.desc}</p>
+                  <p className="text-xs text-amber-300 mt-2">{mode.safeNote}</p>
+                </button>
+              ))}
             </div>
-            {tradeStatus ? (
-              <div
-                className={`rounded-lg px-3 py-2 text-sm ${
-                  tradeStatus.startsWith("✓")
-                    ? "bg-green-950 border border-green-800 text-green-300"
-                    : "bg-amber-950 border border-amber-800 text-amber-200"
-                }`}
-              >
-                {tradeStatus}
-              </div>
-            ) : (
-              <button
-                onClick={placePractice}
-                disabled={busy}
-                className="w-full bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm"
-              >
-                {busy ? "Placing…" : "Place practice trade"}
-              </button>
-            )}
           </div>
         )}
 
-        {/* Step 4 — Done */}
         {step === 4 && (
+          <div className="space-y-4">
+            <h1 className="text-2xl font-bold">Build your first watchlist</h1>
+            <p className="text-[var(--muted)] text-sm">
+              Pick at least 3 symbols. You can add more later.
+            </p>
+            <div className="space-y-4">
+              {watchlistGroups.map((group) => (
+                <div key={group.label}>
+                  <p className="text-xs text-indigo-300 mb-2">{group.label}</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {group.symbols.map((sym) => {
+                      const selected = watchSymbols.includes(sym);
+                      return (
+                        <button
+                          key={sym}
+                          onClick={() => toggleSymbol(sym)}
+                          className={`py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${
+                            selected
+                              ? "bg-indigo-600 border-indigo-500 text-white"
+                              : "border-[var(--card-border)] text-[var(--muted)] hover:border-indigo-700"
+                          }`}
+                        >
+                          {sym}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs text-[var(--muted)]">
+              {watchSymbols.length === 0 ? (
+                <span>Pick some above ↑</span>
+              ) : (
+                <span>{watchSymbols.length} selected · {watchSymbols.join(", ")}</span>
+              )}
+            </div>
+            <button
+              onClick={() => setWatchSymbols(availableSymbols.slice(0, 8))}
+              className="text-xs text-indigo-300 hover:text-indigo-200"
+            >
+              Use recommended starter watchlist
+            </button>
+          </div>
+        )}
+
+        {step === 5 && (
           <div className="text-center space-y-5">
             <div className="text-5xl">🎉</div>
-            <h1 className="text-2xl font-bold">You&apos;re all set</h1>
+            <h1 className="text-2xl font-bold">Your research dashboard is ready</h1>
+            <div className="bg-[var(--background)] border border-[var(--card-border)] rounded-xl p-4 text-sm text-left max-w-lg mx-auto space-y-2">
+              <p><span className="text-[var(--muted)]">Market focus:</span> {MARKET_FOCUS.find((m) => m.id === marketFocus)?.name}</p>
+              <p><span className="text-[var(--muted)]">Experience:</span> {EXPERIENCE_LEVELS.find((e) => e.id === experience)?.name}</p>
+              <p><span className="text-[var(--muted)]">Connection:</span> {CONNECTION_MODES.find((m) => m.id === connectionMode)?.name}</p>
+              <p><span className="text-[var(--muted)]">Watchlist:</span> {watchSymbols.join(", ")}</p>
+            </div>
             <p className="text-[var(--muted)] text-sm max-w-md mx-auto">
-              Your dashboard is ready. Place trades, run AI agents, journal your decisions, track P&amp;L.
+              Elexa will open the dashboard or the Connections page depending on the mode you selected.
             </p>
             <button
               onClick={finish}
               disabled={busy}
               className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-8 py-3 rounded-lg font-semibold text-sm"
             >
-              {busy ? "Loading…" : "Open Dashboard"}
+              {busy ? "Saving…" : "Finish setup"}
             </button>
           </div>
         )}
 
-        {/* Nav buttons */}
         {step > 0 && step < STEPS.length - 1 && (
           <div className="flex justify-between items-center mt-8 pt-6 border-t border-[var(--card-border)]">
             <button
@@ -315,15 +465,10 @@ export default function OnboardingWizard({ email }: { email: string }) {
               </a>
               <button
                 onClick={next}
-                disabled={
-                  busy ||
-                  (step === 1 && !risk) ||
-                  (step === 2 && watchSymbols.length < 3) ||
-                  (step === 3 && !tradeStatus?.startsWith("✓"))
-                }
+                disabled={busy || !canContinue}
                 className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-6 py-2 rounded-lg font-semibold text-sm"
               >
-                {busy ? "…" : "Continue →"}
+                Continue →
               </button>
             </div>
           </div>
@@ -335,7 +480,7 @@ export default function OnboardingWizard({ email }: { email: string }) {
               onClick={next}
               className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-semibold text-sm"
             >
-              Let&apos;s go →
+              Start setup →
             </button>
           </div>
         )}
