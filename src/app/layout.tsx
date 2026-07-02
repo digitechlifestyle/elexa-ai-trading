@@ -92,6 +92,9 @@ export default function RootLayout({
               <a href="/guide" className="hover:text-white underline">
                 User Guide
               </a>
+              <a href="/faq" className="hover:text-white underline font-semibold text-indigo-300">
+                FAQ
+              </a>
               <a href="/markets" className="hover:text-white underline">
                 Markets &amp; Connections
               </a>
