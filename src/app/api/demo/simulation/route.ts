@@ -16,6 +16,14 @@ function cleanSymbols(symbols: unknown): string[] {
     .slice(0, 30);
 }
 
+function parseSymbolText(value: string | null): string[] {
+  if (!value) return [];
+  return value
+    .split(/[,\s]+/)
+    .map((symbol) => symbol.trim().toUpperCase())
+    .filter(Boolean);
+}
+
 function buildRiskNotes(focus: string, symbols: string[]) {
   const stablecoins = symbols.filter((symbol) =>
     ["USDT", "USDC", "RLUSD", "PYUSD", "FDUSD", "DAI", "USDE"].includes(symbol)
@@ -47,24 +55,27 @@ function buildRiskNotes(focus: string, symbols: string[]) {
   return notes;
 }
 
-export async function POST(request: Request) {
-  try {
-    const body = (await request.json()) as DemoRequest;
-    const focus = allowedFocus.has(String(body.focus)) ? String(body.focus) : "mixed";
-    const symbols = cleanSymbols(body.symbols);
+function buildDemoResponse(focusInput: unknown, symbolsInput: unknown) {
+  const focus = allowedFocus.has(String(focusInput)) ? String(focusInput) : "mixed";
+  const symbols = cleanSymbols(symbolsInput);
 
-    if (symbols.length === 0) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: "Add at least one valid symbol to run the demo simulation.",
-        },
-        { status: 400 }
-      );
-    }
+  if (symbols.length === 0) {
+    return {
+      ok: false,
+      status: 400,
+      body: {
+        ok: false,
+        error: "Add at least one valid symbol to run the demo simulation.",
+      },
+    };
+  }
 
-    const primarySymbol = symbols[0];
-    const response = {
+  const primarySymbol = symbols[0];
+
+  return {
+    ok: true,
+    status: 200,
+    body: {
       ok: true,
       mode: "demo",
       focus,
@@ -82,9 +93,15 @@ export async function POST(request: Request) {
       nextAction:
         "Continue research in demo mode. Do not connect real funds or use withdrawal-enabled API keys.",
       generatedAt: new Date().toISOString(),
-    };
+    },
+  };
+}
 
-    return NextResponse.json(response);
+export async function POST(request: Request) {
+  try {
+    const body = (await request.json()) as DemoRequest;
+    const result = buildDemoResponse(body.focus, body.symbols);
+    return NextResponse.json(result.body, { status: result.status });
   } catch {
     return NextResponse.json(
       {
@@ -96,9 +113,19 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
-  return NextResponse.json({
-    ok: true,
-    message: "Demo simulation API is running. Use POST with { focus, symbols } to run a demo simulation.",
-  });
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const focus = url.searchParams.get("focus") ?? "mixed";
+  const symbols = parseSymbolText(url.searchParams.get("symbols"));
+
+  if (symbols.length === 0) {
+    return NextResponse.json({
+      ok: true,
+      message: "Demo simulation API is running. Add query parameters to run a no-JavaScript backend test.",
+      example: "/api/demo/simulation?focus=crypto&symbols=BTC,ETH,XRP,RLUSD,SHX",
+    });
+  }
+
+  const result = buildDemoResponse(focus, symbols);
+  return NextResponse.json(result.body, { status: result.status });
 }
