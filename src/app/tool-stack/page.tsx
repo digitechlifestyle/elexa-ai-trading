@@ -91,6 +91,20 @@ const selectedTools = [
     warning:
       "Keep email automation away from trading keys, balances and sensitive financial data.",
   },
+  {
+    number: "10",
+    name: "Hyperframes",
+    role: "Programmatic video and education content",
+    fit: "Use to generate repeatable explainer videos, onboarding clips, market education shorts and product walkthroughs from HTML-driven templates.",
+    elexaUse: [
+      "Create automated Elexa product walkthrough videos",
+      "Turn Buffett Indicator reports into short educational clips",
+      "Generate market explainers for YouTube, TikTok, Instagram and X",
+      "Version video templates in git so content can be improved safely",
+    ],
+    warning:
+      "Keep videos educational. Do not create hype clips promising profits or implying Elexa predicts markets.",
+  },
 ];
 
 const buffettSections = [
@@ -202,7 +216,7 @@ export default function ToolStackPage() {
           <li>Build the Buffett Indicator Report as a simple macro research page.</li>
           <li>Add LibreChat internally for research and support workflows.</li>
           <li>Use AutoHedge only as architecture inspiration for safe agent roles.</li>
-          <li>Use Open GenerativeAI and Open-LLM-VTuber for education content, not trading logic.</li>
+          <li>Use Open GenerativeAI, Open-LLM-VTuber and Hyperframes for education content, not trading logic.</li>
           <li>Use ClaudeAds and Agentic Inbox for launch marketing and support operations.</li>
         </ol>
       </section>
