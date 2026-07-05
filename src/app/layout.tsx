@@ -45,6 +45,7 @@ const publicNav = [
   { href: "/features", label: "Features" },
   { href: "/assets", label: "Assets" },
   { href: "/markets", label: "Markets" },
+  { href: "/reports/buffett-indicator", label: "Reports" },
   { href: "/tool-stack", label: "Tool Stack" },
   { href: "/roadmap", label: "Roadmap" },
   { href: "/faq", label: "FAQ" },
@@ -144,6 +145,12 @@ export default function RootLayout({
               <a href="/assets" className="hover:text-white underline font-semibold text-indigo-300">
                 Assets
               </a>
+              <a href="/markets" className="hover:text-white underline font-semibold text-indigo-300">
+                Markets
+              </a>
+              <a href="/reports/buffett-indicator" className="hover:text-white underline font-semibold text-indigo-300">
+                Buffett Indicator
+              </a>
               <a href="/tool-stack" className="hover:text-white underline font-semibold text-indigo-300">
                 Tool Stack
               </a>
@@ -155,9 +162,6 @@ export default function RootLayout({
               </a>
               <a href="/faq" className="hover:text-white underline font-semibold text-indigo-300">
                 FAQ
-              </a>
-              <a href="/markets" className="hover:text-white underline">
-                Markets &amp; Connections
               </a>
               <a href="/trust" className="hover:text-white underline font-semibold text-indigo-300">
                 Trust &amp; Safety
