@@ -1,46 +1,66 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import InteractiveAgents from "@/components/InteractiveAgents";
 import { features as featureData } from "@/lib/features-data";
 
 export const metadata: Metadata = {
-  title: "Elexa AI Trading | AI-Powered Paper Trading Research Platform",
+  title: "Elexa AI Trading | AI Market Research, Risk Tools & Strategy Simulator",
   description:
-    "Explore AI-assisted paper trading with Elexa. Multi-agent analysis, trade journals, and risk management — all in simulated mode. Not financial advice.",
+    "Research markets, test strategies, manage risk and journal decisions with Elexa AI Trading. Simulated execution only. Not financial advice.",
 };
 
-const features = [
+const launchPillars = [
   {
-    icon: "🤖",
-    title: "6 AI Agents",
-    desc: "CEO, Quant, Risk, Compliance, SEO, and Support agents work together. Each decision is validated and logged.",
-  },
-  {
-    icon: "🪙",
-    title: "Stocks & Crypto",
-    desc: "Trade stocks via Alpaca. Trade crypto (BTC, XRP, SOL, top 100) via Kraken. Coming: Coinbase, Binance.",
-  },
-  {
-    icon: "⚡",
-    title: "Multi-Exchange",
-    desc: "Plug in your own API keys. We route trades to your choice of exchange. You control the connection.",
-  },
-  {
-    icon: "📓",
-    title: "Trade Journal",
-    desc: "Every AI decision is logged with full reasoning. Review agent recommendations and outcomes.",
+    icon: "🔎",
+    title: "AI Market Research",
+    desc: "Use structured AI agents to summarise market context, compare assets, scan technical conditions and organise research notes before making any decision.",
   },
   {
     icon: "🛡️",
-    title: "Risk Management",
-    desc: "Hard stop-loss limits, max position sizes, daily loss caps. Enforced server-side — no override.",
+    title: "Risk & Portfolio Tools",
+    desc: "Check position size, concentration, drawdown, volatility, risk/reward and portfolio health before a trade idea becomes a real-world risk.",
   },
   {
-    icon: "🔐",
-    title: "Encrypted API Keys",
-    desc: "Your exchange credentials are stored encrypted. Full audit log of every trade and AI decision.",
+    icon: "🧪",
+    title: "Strategy Simulation",
+    desc: "Test trade ideas, strategy templates and paper portfolios in a safe simulated environment with no real money execution at launch.",
+  },
+  {
+    icon: "📓",
+    title: "Decision Journal",
+    desc: "Record the reasoning, agent checks, risk notes and outcomes behind every simulated trade so users can learn from patterns over time.",
+  },
+];
+
+const proofPoints = [
+  "Multi-agent research workflow",
+  "Stocks and crypto watchlists",
+  "Strategy testing and paper portfolios",
+  "Risk checks before every simulated trade",
+  "Trade journal, audit trail and review tools",
+  "Education-first wording with no guaranteed returns",
+];
+
+const launchSteps = [
+  "Build a watchlist for crypto, stocks or both.",
+  "Use AI research agents to inspect market context and risk.",
+  "Test the idea in the simulator before risking real capital elsewhere.",
+  "Journal the decision, review results and improve your process.",
+];
+
+const demoSteps = [
+  {
+    title: "1. Start with demo mode",
+    desc: "Explore sample markets and tools without connecting an exchange or entering API keys.",
+  },
+  {
+    title: "2. Pick your market focus",
+    desc: "Choose crypto, stocks, ETFs or a mixed dashboard during onboarding.",
+  },
+  {
+    title: "3. Add connections later",
+    desc: "Move to read-only or paper/sandbox connections only when you are ready.",
   },
 ];
 
@@ -62,50 +82,70 @@ export default async function HomePage({
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="relative px-6 py-28 text-center max-w-5xl mx-auto w-full">
+      <section className="relative px-6 py-28 text-center max-w-6xl mx-auto w-full">
         <div className="inline-flex items-center gap-2 bg-indigo-950 border border-indigo-800 rounded-full px-4 py-1.5 text-indigo-300 text-sm mb-8">
           <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-          Paper Trading Mode — No Real Money
+          AI research, risk tools and simulated strategy testing
         </div>
 
-        <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6">
-          AI Agents That Research.
+        <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
+          Research smarter.
           <br />
-          <span className="text-indigo-400">You Decide What&apos;s Real.</span>
+          <span className="text-indigo-400">Test before you trade.</span>
         </h1>
 
-        <p className="text-xl text-[var(--muted)] max-w-2xl mx-auto mb-10">
-          Elexa deploys a team of specialised AI agents to analyse markets,
-          validate strategies, and execute paper trades — so you can study
-          algorithmic approaches safely before touching real capital.
+        <p className="text-xl text-[var(--muted)] max-w-3xl mx-auto mb-10 leading-relaxed">
+          Elexa AI Trading helps users research markets, test strategies,
+          manage risk and keep a disciplined trading journal before risking
+          real capital elsewhere. Launch mode uses simulated execution only.
         </p>
 
         <div className="flex flex-wrap gap-4 justify-center">
           <Link
-            href="/dashboard"
+            href="/onboarding"
             className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
           >
-            Open Paper Dashboard
+            Start in Demo Mode
+          </Link>
+          <Link
+            href="/markets"
+            className="border border-[var(--card-border)] hover:border-indigo-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+          >
+            View Markets
           </Link>
           <Link
             href="/pricing"
             className="border border-[var(--card-border)] hover:border-indigo-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
           >
-            View Pricing
+            View Plans
           </Link>
         </div>
 
-        <p className="mt-6 text-xs text-[var(--muted)]">
-          For research and education only. Not financial advice.{" "}
+        <p className="mt-6 text-xs text-[var(--muted)] max-w-2xl mx-auto">
+          Demo mode is the safest place to start. Research and education only.
+          Elexa does not provide financial advice, personal investment
+          recommendations, guaranteed returns or real-money execution at launch.{" "}
           <Link href="/disclaimer" className="underline hover:text-white">
             Read full disclaimer →
           </Link>
         </p>
 
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-12 max-w-4xl mx-auto text-left">
+          {proofPoints.map((point) => (
+            <div
+              key={point}
+              className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl px-4 py-3 text-sm text-[var(--muted)]"
+            >
+              <span className="text-indigo-400 mr-2">✓</span>
+              {point}
+            </div>
+          ))}
+        </div>
+
         {/* Social Share Buttons */}
         <div className="flex flex-wrap justify-center gap-3 mt-8">
           <a
-            href={`https://twitter.com/intent/tweet?text=Elexa AI Trading - AI agents for paper trading&url=https://elexa-ai-trading.vercel.app&hashtags=AI,Trading,Research`}
+            href={`https://twitter.com/intent/tweet?text=Elexa AI Trading - AI market research, risk tools and strategy simulation&url=https://elexa-ai-trading.vercel.app&hashtags=AI,Trading,Research,RiskManagement`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
@@ -150,25 +190,7 @@ export default async function HomePage({
             🎵
           </a>
           <a
-            href={`https://www.pinterest.com/pin/create/button/?url=https://elexa-ai-trading.vercel.app&description=Elexa AI Trading`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
-            title="Share on Pinterest"
-          >
-            📌
-          </a>
-          <a
-            href={`https://reddit.com/submit?url=https://elexa-ai-trading.vercel.app&title=Elexa AI Trading`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
-            title="Share on Reddit"
-          >
-            🔴
-          </a>
-          <a
-            href={`mailto:?subject=Elexa AI Trading&body=Check out Elexa AI Trading - AI agents for paper trading: https://elexa-ai-trading.vercel.app`}
+            href={`mailto:?subject=Elexa AI Trading&body=Check out Elexa AI Trading - AI market research, risk tools and strategy simulation: https://elexa-ai-trading.vercel.app`}
             className="inline-flex items-center gap-2 bg-indigo-900 hover:bg-indigo-800 text-white px-3 py-2 rounded-lg text-xs transition-colors"
             title="Share via Email"
           >
@@ -177,15 +199,127 @@ export default async function HomePage({
         </div>
       </section>
 
+      {/* Demo mode path */}
+      <section className="px-6 py-16 bg-[var(--card)] border-y border-[var(--card-border)]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-indigo-400 text-sm font-semibold mb-3">
+              Safest way to begin
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Try Elexa without exchange keys
+            </h2>
+            <p className="text-[var(--muted)] max-w-2xl mx-auto">
+              New users can start with demo data, build a watchlist and learn
+              the research workflow before connecting any platform.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {demoSteps.map((item) => (
+              <div
+                key={item.title}
+                className="bg-[var(--background)] border border-[var(--card-border)] rounded-xl p-6"
+              >
+                <h3 className="font-semibold mb-2">{item.title}</h3>
+                <p className="text-[var(--muted)] text-sm leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link
+              href="/onboarding"
+              className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+            >
+              Start Safe Setup
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Launch pillars */}
+      <section className="px-6 py-20 bg-[var(--card)] border-y border-[var(--card-border)]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-indigo-400 text-sm font-semibold mb-3">
+              More than paper trading
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              A complete research workflow for disciplined traders
+            </h2>
+            <p className="text-[var(--muted)] max-w-2xl mx-auto">
+              Paper trading is only one part of the platform. Elexa is designed
+              around research, risk control, simulation and review so users can
+              build a repeatable process instead of chasing hype.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {launchPillars.map((pillar) => (
+              <div
+                key={pillar.title}
+                className="bg-[var(--background)] border border-[var(--card-border)] rounded-xl p-6"
+              >
+                <div className="text-3xl mb-4">{pillar.icon}</div>
+                <h3 className="font-semibold text-lg mb-2">{pillar.title}</h3>
+                <p className="text-[var(--muted)] text-sm leading-relaxed">
+                  {pillar.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Workflow */}
+      <section className="px-6 py-20">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          <div>
+            <p className="text-indigo-400 text-sm font-semibold mb-3">
+              How launch mode works
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              From market idea to reviewed decision
+            </h2>
+            <p className="text-[var(--muted)] mb-6 leading-relaxed">
+              Elexa should help users slow down, check the facts, inspect risk
+              and review the outcome. That is the launch promise: better process,
+              not guaranteed profit.
+            </p>
+            <Link
+              href="/onboarding"
+              className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              Try Demo Setup
+            </Link>
+          </div>
+
+          <div className="space-y-4">
+            {launchSteps.map((step, index) => (
+              <div
+                key={step}
+                className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl p-5 flex gap-4"
+              >
+                <div className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shrink-0">
+                  {index + 1}
+                </div>
+                <p className="text-[var(--muted)] leading-relaxed">{step}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="px-6 py-20 bg-[var(--card)] border-y border-[var(--card-border)]">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-4">
-            How Elexa Works
+            Explore the Elexa feature guides
           </h2>
-          <p className="text-center text-[var(--muted)] mb-14 max-w-xl mx-auto">
-            A structured team of AI agents — each with a defined role and hard
-            risk limits they cannot override.
+          <p className="text-center text-[var(--muted)] mb-14 max-w-2xl mx-auto">
+            Each feature should support one of four launch goals: research,
+            risk control, simulated testing or disciplined review.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featureData.map((f) => (
@@ -214,23 +348,52 @@ export default async function HomePage({
       {/* Agent org chart — Interactive */}
       <InteractiveAgents />
 
+      {/* Safety */}
+      <section className="px-6 py-16 bg-amber-950 border-y border-amber-800 text-center">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold mb-4 text-amber-100">
+            Built for education, research and simulation
+          </h2>
+          <p className="text-amber-300 leading-relaxed">
+            Elexa does not provide personal financial advice, regulated
+            investment recommendations, guaranteed returns or real-money
+            execution at launch. Users remain responsible for any investment
+            decisions they make outside the platform.
+          </p>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="px-6 py-20 bg-indigo-950 border-y border-indigo-900 text-center">
         <h2 className="text-3xl font-bold mb-4">
-          Start Paper Trading Today — Free
+          Start in demo mode. Upgrade only when ready.
         </h2>
-        <p className="text-indigo-300 mb-8 max-w-lg mx-auto">
-          No credit card required for paper trading. Study AI-driven strategies
-          risk-free before deciding if live deployment is right for you.
+        <p className="text-indigo-300 mb-8 max-w-2xl mx-auto">
+          Build your first watchlist, choose your market focus and test the
+          research workflow without connecting real funds or placing live trades.
         </p>
-        <Link
-          href="/dashboard"
-          className="bg-white text-indigo-900 hover:bg-indigo-100 px-10 py-3 rounded-lg font-semibold transition-colors inline-block"
-        >
-          Get Started Free
-        </Link>
+        <div className="flex flex-wrap gap-4 justify-center">
+          <Link
+            href="/onboarding"
+            className="bg-white text-indigo-900 hover:bg-indigo-100 px-10 py-3 rounded-lg font-semibold transition-colors inline-block"
+          >
+            Start Demo Setup
+          </Link>
+          <Link
+            href="/markets"
+            className="border border-indigo-700 hover:border-indigo-400 text-white px-10 py-3 rounded-lg font-semibold transition-colors inline-block"
+          >
+            See Supported Markets
+          </Link>
+          <Link
+            href="/pricing"
+            className="border border-indigo-700 hover:border-indigo-400 text-white px-10 py-3 rounded-lg font-semibold transition-colors inline-block"
+          >
+            Compare Plans
+          </Link>
+        </div>
         <p className="mt-4 text-indigo-400 text-xs">
-          Paper trading only. Real money trading is not available.
+          Launch mode: research, education, journaling and simulated execution only.
         </p>
       </section>
     </div>

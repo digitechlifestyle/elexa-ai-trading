@@ -3,42 +3,42 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Risk Disclaimer & Legal Disclosure",
   description:
-    "Full financial risk disclaimer for Elexa AI Trading. Read before using the platform.",
+    "Financial risk disclaimer for Elexa AI Trading. Research, education, journaling and simulated strategy testing only.",
   robots: { index: true, follow: true },
 };
 
 const sections = [
   {
     heading: "Not Financial Advice",
-    body: `Elexa AI Trading and its AI agents do not provide investment advice, brokerage services, portfolio management, or any form of financial advisory services. All content on this platform — including AI-generated signals, trade ideas, analysis, and commentary — is for educational and research purposes only. Nothing on this platform constitutes a recommendation to buy or sell any security.`,
+    body: `Elexa AI Trading and its AI agents do not provide investment advice, brokerage services, portfolio management, personal recommendations, regulated financial promotions, or any form of financial advisory service. All platform content, including AI-generated research, trade ideas, analysis, commentary, scanners and strategy outputs, is for education, research, journaling and simulated testing only. Nothing on this platform is a recommendation to buy, sell or hold any security, crypto asset, derivative or financial instrument.`,
   },
   {
     heading: "No Guarantee of Profit",
-    body: `There is no guarantee of profit. No trading system, algorithm, or AI model can guarantee profitable results. Past performance of any strategy, agent, or signal presented on this platform does not guarantee or even suggest similar future results. You may lose all capital you invest.`,
+    body: `There is no guarantee of profit. No trading system, algorithm, AI model, scanner, strategy template or research workflow can guarantee profitable results. Past performance, simulated performance, backtested performance or paper-trading performance does not guarantee or suggest similar future results. You may lose all capital you invest outside this platform.`,
   },
   {
-    heading: "Paper Trading Environment",
-    body: `Elexa AI Trading operates exclusively in a simulated (paper trading) environment using Alpaca Markets' paper trading API. No real money is moved, no real securities are purchased, and no real trades are executed through this platform. Simulated results may differ materially from actual trading results due to market liquidity, slippage, fees, and other factors not reflected in simulation.`,
+    heading: "Launch Mode: Simulation Only",
+    body: `Elexa AI Trading launch mode operates as a research, education, journaling and simulation platform. No real money is moved, no real securities or crypto assets are purchased, and no real trades are executed through launch-mode simulation. Simulated results can differ materially from actual trading results due to liquidity, slippage, fees, spread, latency, taxes, execution quality and market conditions.`,
   },
   {
-    heading: "AI Agent Limitations",
-    body: `AI-generated content, signals, and decisions produced by the Elexa agent system are experimental. AI models can produce incorrect, outdated, or misleading outputs. They do not have access to real-time complete market data, cannot account for all market conditions, and should never be used as the sole basis for real financial decisions.`,
+    heading: "AI Limitations",
+    body: `AI-generated outputs are experimental and may be incorrect, incomplete, delayed, biased, outdated or misleading. AI systems cannot account for all market conditions, personal circumstances, tax consequences, regulatory restrictions or suitability factors. AI outputs must not be used as the sole basis for real financial decisions.`,
   },
   {
     heading: "Regulatory Status",
-    body: `Elexa AI Trading LLC is not registered with the U.S. Securities and Exchange Commission (SEC), the Financial Industry Regulatory Authority (FINRA), the Commodity Futures Trading Commission (CFTC), or any other financial regulatory body. This platform does not constitute a brokerage service, investment advisor, or broker-dealer.`,
+    body: `Elexa AI Trading is not a broker, investment adviser, asset manager, financial planner, exchange, custodian, broker-dealer or regulated trading venue. The platform is not intended to replace licensed professional advice. Users are responsible for checking the laws, regulations and financial-promotion rules that apply in their jurisdiction.`,
   },
   {
     heading: "Risk of Loss",
-    body: `Trading securities, options, futures, forex, cryptocurrencies, and other financial instruments carries a high level of risk and may not be suitable for all investors. The high degree of leverage that is often obtainable can work against you as well as for you. Before deciding to invest, you should carefully consider your investment objectives, level of experience, and risk appetite.`,
+    body: `Trading securities, options, futures, forex, cryptocurrencies and other financial instruments carries a high level of risk and may not be suitable for all investors. Digital assets can be extremely volatile. Before making any real investment decision outside this platform, carefully consider your objectives, experience, financial position and risk appetite.`,
   },
   {
     heading: "Third-Party Services",
-    body: `This platform integrates with third-party services including Alpaca Markets and Anthropic. Elexa AI Trading is not responsible for the accuracy, availability, or reliability of these services. Use of third-party services is subject to their respective terms of service and risk disclosures.`,
+    body: `This platform may integrate with third-party services such as data providers, AI providers, authentication providers, payment processors and broker or exchange sandboxes. Elexa AI Trading is not responsible for the accuracy, availability, security or reliability of third-party services. Use of third-party services is subject to their own terms, privacy policies and risk disclosures.`,
   },
   {
     heading: "Consult a Professional",
-    body: `Before making any real investment or trading decisions, consult a licensed and regulated financial advisor, broker-dealer, or investment advisor registered with the appropriate regulatory authority in your jurisdiction. Do not make financial decisions based on content generated by this platform.`,
+    body: `Before making any real investment, tax or trading decision, consult a licensed and regulated professional who understands your circumstances and jurisdiction. Do not make real financial decisions based only on content generated by this platform.`,
   },
 ];
 
@@ -73,17 +73,17 @@ export default function DisclaimerPage() {
           Summary — Plain English
         </p>
         <ul className="text-amber-200 text-sm space-y-1 list-disc list-inside">
-          <li>This is a research tool. Not financial advice.</li>
-          <li>Profits are not guaranteed. You can lose everything.</li>
-          <li>All trades are simulated. No real money moves.</li>
-          <li>AI signals are experimental. Do not rely on them for real decisions.</li>
-          <li>We are not registered financial advisors or brokers.</li>
-          <li>Talk to a licensed financial advisor before investing.</li>
+          <li>This is a research, education, journaling and simulation tool.</li>
+          <li>It is not financial advice or a personal recommendation service.</li>
+          <li>Profits are not guaranteed. Real investing can lose money.</li>
+          <li>Launch-mode trading is simulated. No real money moves.</li>
+          <li>AI outputs can be wrong. Do not rely on them alone.</li>
+          <li>Talk to a licensed professional before investing.</li>
         </ul>
       </div>
 
       <p className="mt-8 text-xs text-[var(--muted)]">
-        Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+        Last updated: July 2026
       </p>
     </div>
   );

@@ -3,9 +3,9 @@ import Link from "next/link";
 import UpgradeButton from "./UpgradeButton";
 
 export const metadata: Metadata = {
-  title: "Pricing — Paper Trading Research Plans",
+  title: "Pricing — AI Research, Risk Tools & Strategy Simulation Plans",
   description:
-    "Elexa AI Trading pricing. Paper trading research tool plans. Not financial advice.",
+    "Elexa AI Trading pricing for AI market research, risk management, journaling and simulated strategy testing. Not financial advice.",
 };
 
 type PricingPlan = {
@@ -26,14 +26,15 @@ const plans: PricingPlan[] = [
     name: "Free",
     price: "$0",
     period: "forever",
-    description: "Explore the platform and run paper trades manually.",
+    description: "Start with the dashboard, watchlist and basic simulated research workflow.",
     features: [
-      "Paper trading dashboard",
-      "5 AI agent runs / day",
-      "Basic trade journal (30-day retention)",
-      "Watchlist (5 symbols)",
-      "Risk limit enforcement",
-      "Community support",
+      "Research dashboard access",
+      "Basic market watchlist",
+      "Limited AI research runs",
+      "Simulated paper portfolio",
+      "Basic trade journal",
+      "Core risk reminders",
+      "Education-first disclaimer prompts",
     ],
     cta: "Get Started",
     hrefIfFree: "/dashboard",
@@ -44,14 +45,14 @@ const plans: PricingPlan[] = [
     name: "Researcher",
     price: "$29",
     period: "/ month",
-    description: "Unlock AI agents and deeper signal analysis.",
+    description: "For users who want deeper AI research, scanners, journaling and exports.",
     features: [
       "Everything in Free",
-      "Unlimited agent runs",
-      "3 paper portfolios",
-      "1-year journal retention",
-      "Watchlist (30 symbols)",
-      "CSV trade export",
+      "Expanded AI research runs",
+      "Market scanners and watchlist tools",
+      "Multiple simulated portfolios",
+      "Extended journal retention",
+      "CSV exports for review",
       "Email support",
     ],
     cta: "Start Researcher",
@@ -62,15 +63,15 @@ const plans: PricingPlan[] = [
     name: "Pro",
     price: "$99",
     period: "/ month",
-    description: "Full platform access for serious traders.",
+    description: "Advanced research workflow for serious learners, analysts and power users.",
     features: [
       "Everything in Researcher",
-      "Auto-Trade workflow (Quant → Risk → execute)",
+      "Advanced strategy simulation",
       "Custom risk profiles per portfolio",
-      "API access (read-only)",
       "Advanced agent orchestration",
+      "Portfolio health and review tools",
       "Priority support",
-      "Live trading (when activated)",
+      "Roadmap access to future integrations",
     ],
     cta: "Start Pro",
     highlight: false,
@@ -81,10 +82,16 @@ export default function PricingPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-20">
       <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
-        <p className="text-[var(--muted)] text-lg max-w-xl mx-auto">
-          All plans include paper trading only. No real money is ever at risk on
-          this platform.
+        <p className="text-indigo-400 text-sm font-semibold mb-3">
+          Launch-mode pricing
+        </p>
+        <h1 className="text-4xl font-bold mb-4">
+          Research, risk tools and strategy simulation plans
+        </h1>
+        <p className="text-[var(--muted)] text-lg max-w-2xl mx-auto">
+          Elexa is priced as an AI research and simulated strategy-testing
+          platform. It does not provide financial advice, guaranteed returns or
+          live real-money execution at launch.
         </p>
       </div>
 
@@ -100,7 +107,7 @@ export default function PricingPage() {
           >
             {plan.highlight && (
               <span className="self-start text-xs font-semibold bg-indigo-600 text-white px-3 py-1 rounded-full">
-                Most Popular
+                Best for launch users
               </span>
             )}
             <div>
@@ -146,10 +153,11 @@ export default function PricingPage() {
       </div>
 
       <div className="mt-12 p-6 bg-amber-950 border border-amber-800 rounded-xl text-center">
-        <p className="text-amber-300 text-sm">
-          <strong>Reminder:</strong> Elexa AI Trading is a paper trading
-          research tool only. No real securities are purchased. This is not
-          financial advice, and no returns are guaranteed.{" "}
+        <p className="text-amber-300 text-sm leading-relaxed">
+          <strong>Important:</strong> Elexa is a research, education,
+          journaling and simulation platform. It is not a broker, adviser,
+          signal service or guarantee of profit. No real securities or crypto
+          assets are purchased through launch-mode simulation.{" "}
           <Link href="/disclaimer" className="underline hover:text-amber-200">
             Read full disclaimer
           </Link>
