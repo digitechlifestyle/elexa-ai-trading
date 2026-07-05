@@ -44,6 +44,40 @@ function buildRiskNotes(focus: string, symbols: string[]) {
   return notes;
 }
 
+function buildDemoSummary(focus: string, primarySymbol: string, symbols: string[]) {
+  const joined = symbols.join(", ");
+
+  if (focus === "crypto") {
+    return `${primarySymbol} is being reviewed inside a crypto-focused watchlist. Elexa should look at market structure, liquidity, token-specific catalysts, stablecoin exposure and overall risk sentiment before the idea is taken further.`;
+  }
+
+  if (focus === "stocks") {
+    return `${primarySymbol} is being reviewed inside an equity-focused watchlist. Elexa should compare valuation, earnings sensitivity, sector momentum, macro pressure and concentration risk before the idea is taken further.`;
+  }
+
+  if (focus === "etfs") {
+    return `${primarySymbol} is being reviewed inside an ETF-focused watchlist. Elexa should compare exposure, fees, liquidity, sector concentration and macro sensitivity before the idea is taken further.`;
+  }
+
+  return `${primarySymbol} is being reviewed inside a mixed-market watchlist covering ${joined}. Elexa should separate crypto risk, stock risk and ETF risk instead of treating every asset type the same.`;
+}
+
+function riskLevel(focus: string, symbols: string[]) {
+  const hasCrypto = focus === "crypto" || focus === "mixed" || symbols.some((symbol) => ["BTC", "ETH", "XRP", "RLUSD", "SHX", "USDT", "USDC"].includes(symbol));
+  const hasStablecoin = symbols.some((symbol) => ["USDT", "USDC", "RLUSD", "PYUSD", "FDUSD", "DAI", "USDE"].includes(symbol));
+  const hasMixedAssets = focus === "mixed" || (hasCrypto && symbols.some((symbol) => ["NVDA", "MSFT", "AAPL", "SPY", "QQQ", "GLD"].includes(symbol)));
+
+  if (hasMixedAssets || (hasCrypto && hasStablecoin)) {
+    return "High research caution";
+  }
+
+  if (hasCrypto) {
+    return "High volatility caution";
+  }
+
+  return "Moderate research caution";
+}
+
 export default function DemoResultClient() {
   const searchParams = useSearchParams();
   const focusInput = searchParams.get("focus") ?? "mixed";
@@ -51,6 +85,8 @@ export default function DemoResultClient() {
   const symbols = parseSymbols(searchParams.get("symbols"));
   const primarySymbol = symbols[0] ?? "No symbol selected";
   const riskNotes = buildRiskNotes(focus, symbols);
+  const summary = buildDemoSummary(focus, primarySymbol, symbols);
+  const caution = riskLevel(focus, symbols);
 
   if (symbols.length === 0) {
     return (
@@ -89,7 +125,7 @@ export default function DemoResultClient() {
         </p>
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+      <section className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-10">
         <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-6">
           <p className="text-[var(--muted)] text-sm mb-2">Focus</p>
           <p className="text-2xl font-bold capitalize">{focus}</p>
@@ -102,6 +138,15 @@ export default function DemoResultClient() {
           <p className="text-[var(--muted)] text-sm mb-2">Symbols reviewed</p>
           <p className="text-2xl font-bold">{symbols.length}</p>
         </div>
+        <div className="bg-amber-950 border border-amber-800 rounded-2xl p-6">
+          <p className="text-amber-300 text-sm mb-2">Risk mode</p>
+          <p className="text-xl font-bold text-amber-100">{caution}</p>
+        </div>
+      </section>
+
+      <section className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-8 mb-10">
+        <h2 className="text-2xl font-bold mb-4">Elexa summary</h2>
+        <p className="text-[var(--muted)] text-sm leading-relaxed">{summary}</p>
       </section>
 
       <section className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-8 mb-10">
@@ -115,6 +160,26 @@ export default function DemoResultClient() {
               {symbol}
             </span>
           ))}
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+        <div className="bg-indigo-950 border border-indigo-800 rounded-2xl p-8">
+          <h2 className="text-2xl font-bold mb-4">Bull case to investigate</h2>
+          <div className="space-y-3 text-indigo-200 text-sm leading-relaxed">
+            <p>• Check whether recent news or macro conditions support the idea.</p>
+            <p>• Look for liquidity, adoption, earnings, flows or sector strength.</p>
+            <p>• Compare {primarySymbol} against the rest of the watchlist.</p>
+          </div>
+        </div>
+
+        <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-8">
+          <h2 className="text-2xl font-bold mb-4">Bear case to investigate</h2>
+          <div className="space-y-3 text-[var(--muted)] text-sm leading-relaxed">
+            <p>• Look for weak volume, bad news, regulatory pressure or valuation risk.</p>
+            <p>• Check whether the idea depends too much on hype or one catalyst.</p>
+            <p>• Ask what would make the research thesis wrong.</p>
+          </div>
         </div>
       </section>
 
@@ -136,6 +201,19 @@ export default function DemoResultClient() {
               <p key={note}>• {note}</p>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-8 mb-10">
+        <h2 className="text-2xl font-bold mb-4">Journal prompt</h2>
+        <p className="text-[var(--muted)] text-sm leading-relaxed mb-4">
+          Before making any decision outside Elexa, write a short note answering:
+        </p>
+        <div className="space-y-2 text-[var(--muted)] text-sm">
+          <p>1. Why am I interested in {primarySymbol}?</p>
+          <p>2. What evidence supports the idea?</p>
+          <p>3. What evidence would prove me wrong?</p>
+          <p>4. What risk am I not thinking about?</p>
         </div>
       </section>
 
