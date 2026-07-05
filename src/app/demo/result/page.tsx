@@ -9,6 +9,15 @@ export const metadata: Metadata = {
 
 const allowedFocus = new Set(["crypto", "stocks", "etfs", "mixed"]);
 
+type DemoSearchParams = {
+  focus?: string | string[];
+  symbols?: string | string[];
+};
+
+function firstValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 function parseSymbols(value: string | string[] | undefined): string[] {
   const raw = Array.isArray(value) ? value.join(",") : value ?? "";
   return raw
@@ -49,15 +58,15 @@ function buildRiskNotes(focus: string, symbols: string[]) {
   return notes;
 }
 
-export default function DemoResultPage({
+export default async function DemoResultPage({
   searchParams,
 }: {
-  searchParams: { focus?: string; symbols?: string | string[] };
+  searchParams: Promise<DemoSearchParams>;
 }) {
-  const focus = allowedFocus.has(String(searchParams.focus))
-    ? String(searchParams.focus)
-    : "mixed";
-  const symbols = parseSymbols(searchParams.symbols);
+  const params = await searchParams;
+  const focusInput = firstValue(params.focus);
+  const focus = allowedFocus.has(String(focusInput)) ? String(focusInput) : "mixed";
+  const symbols = parseSymbols(params.symbols);
   const primarySymbol = symbols[0] ?? "No symbol selected";
   const riskNotes = buildRiskNotes(focus, symbols);
   const generatedAt = new Date().toISOString();
