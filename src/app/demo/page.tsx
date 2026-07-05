@@ -10,19 +10,19 @@ export const metadata: Metadata = {
 const exampleTests = [
   {
     label: "Crypto demo",
-    href: "/api/demo/simulation?focus=crypto&symbols=BTC,ETH,XRP,RLUSD,SHX",
+    href: "/demo/result?focus=crypto&symbols=BTC,ETH,XRP,RLUSD,SHX",
   },
   {
     label: "Stocks demo",
-    href: "/api/demo/simulation?focus=stocks&symbols=NVDA,MSFT,AAPL,MSTR,PLTR",
+    href: "/demo/result?focus=stocks&symbols=NVDA,MSFT,AAPL,MSTR,PLTR",
   },
   {
     label: "ETF demo",
-    href: "/api/demo/simulation?focus=etfs&symbols=SPY,QQQ,GLD,SLV,TLT",
+    href: "/demo/result?focus=etfs&symbols=SPY,QQQ,GLD,SLV,TLT",
   },
   {
     label: "Mixed demo",
-    href: "/api/demo/simulation?focus=mixed&symbols=BTC,RLUSD,NVDA,SPY,GLD,SHX",
+    href: "/demo/result?focus=mixed&symbols=BTC,RLUSD,NVDA,SPY,GLD,SHX",
   },
 ];
 
@@ -37,8 +37,8 @@ export default function DemoPage() {
           Test Elexa without login or broken buttons.
         </h1>
         <p className="text-[var(--muted)] text-lg max-w-3xl mx-auto leading-relaxed">
-          This demo uses a normal browser form that submits directly to the
-          backend simulation API. It does not rely on client-side React state, so
+          This demo uses a normal browser form and then shows a formatted Elexa
+          research result page. It does not rely on client-side React state, so
           it is safer for preview testing on mobile, desktop and private browser windows.
         </p>
       </section>
@@ -55,14 +55,14 @@ export default function DemoPage() {
       </section>
 
       <section className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-8 mb-12">
-        <h2 className="text-2xl font-bold mb-4">Run backend demo simulation</h2>
+        <h2 className="text-2xl font-bold mb-4">Run formatted demo simulation</h2>
         <p className="text-[var(--muted)] text-sm leading-relaxed mb-6">
           Type the symbols you want to test, separated by commas, then submit.
-          The response will come from the backend API as JSON so we can confirm
-          the server function is working.
+          You will see a clean Elexa report page with the watchlist, research
+          plan, risk notes and next action.
         </p>
 
-        <form action="/api/demo/simulation" method="get" className="space-y-5">
+        <form action="/demo/result" method="get" className="space-y-5">
           <div>
             <label htmlFor="focus" className="block text-sm font-semibold mb-2">
               Market focus
@@ -99,15 +99,15 @@ export default function DemoPage() {
             type="submit"
             className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
           >
-            Submit Backend Demo
+            Generate Demo Report
           </button>
         </form>
       </section>
 
       <section className="bg-indigo-950 border border-indigo-800 rounded-2xl p-8 mb-12">
-        <h2 className="text-2xl font-bold mb-4">One-click backend tests</h2>
+        <h2 className="text-2xl font-bold mb-4">One-click formatted demo reports</h2>
         <p className="text-indigo-200 text-sm leading-relaxed mb-6">
-          These links test the same backend function without typing anything.
+          These links open clean report pages without typing anything.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {exampleTests.map((test) => (
