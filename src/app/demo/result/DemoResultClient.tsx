@@ -62,6 +62,29 @@ function buildDemoSummary(focus: string, primarySymbol: string, symbols: string[
   return `${primarySymbol} is being reviewed inside a mixed-market watchlist covering ${joined}. Elexa should separate crypto risk, stock risk and ETF risk instead of treating every asset type the same.`;
 }
 
+function buildFullReview(focus: string, primarySymbol: string, symbols: string[]) {
+  const hasStablecoin = symbols.some((symbol) => ["USDT", "USDC", "RLUSD", "PYUSD", "FDUSD", "DAI", "USDE"].includes(symbol));
+  const hasEquityOrEtf = symbols.some((symbol) => ["NVDA", "MSFT", "AAPL", "SPY", "QQQ", "GLD", "SLV", "MSTR", "PLTR"].includes(symbol));
+  const mixedWarning = hasEquityOrEtf && (focus === "crypto" || focus === "mixed");
+
+  return {
+    verdict:
+      "This is a watchlist review, not a trade recommendation. The idea is suitable for further research only after the user checks market context, downside risk, liquidity and whether the thesis is supported by real evidence rather than hype.",
+    primary:
+      `${primarySymbol} is the lead item in this demo. Elexa should treat it as the starting point for research, then compare it with the rest of the watchlist instead of viewing it in isolation.`,
+    watchlist:
+      mixedWarning
+        ? "The watchlist mixes crypto assets with stocks or ETFs. That is useful for macro comparison, but the risks are different. Crypto volatility, equity valuation and ETF exposure should be reviewed separately."
+        : "The watchlist is narrow enough for a focused review, but the user should still check whether the symbols are connected by a clear thesis or just grouped together randomly.",
+    stablecoin:
+      hasStablecoin
+        ? "Stablecoin exposure is present. Elexa should flag issuer, reserve, liquidity, regulation and de-peg risk. Stablecoins should not be presented as risk-free cash."
+        : "No stablecoin was detected in this watchlist. Elexa should still check liquidity, volatility and market structure before forming a view.",
+    next:
+      "The next step is to collect real market data, recent news, macro context and user journal notes before any real-world decision is made outside Elexa.",
+  };
+}
+
 function riskLevel(focus: string, symbols: string[]) {
   const hasCrypto = focus === "crypto" || focus === "mixed" || symbols.some((symbol) => ["BTC", "ETH", "XRP", "RLUSD", "SHX", "USDT", "USDC"].includes(symbol));
   const hasStablecoin = symbols.some((symbol) => ["USDT", "USDC", "RLUSD", "PYUSD", "FDUSD", "DAI", "USDE"].includes(symbol));
@@ -86,6 +109,7 @@ export default function DemoResultClient() {
   const primarySymbol = symbols[0] ?? "No symbol selected";
   const riskNotes = buildRiskNotes(focus, symbols);
   const summary = buildDemoSummary(focus, primarySymbol, symbols);
+  const review = buildFullReview(focus, primarySymbol, symbols);
   const caution = riskLevel(focus, symbols);
 
   if (symbols.length === 0) {
@@ -116,10 +140,10 @@ export default function DemoResultClient() {
           Demo simulation result
         </p>
         <h1 className="text-4xl md:text-5xl font-bold mb-5">
-          Research preview for {primarySymbol}
+          Full Elexa review for {primarySymbol}
         </h1>
         <p className="text-[var(--muted)] text-lg max-w-3xl mx-auto leading-relaxed">
-          Demo simulation complete for {symbols.length} watchlist symbol
+          Demo review complete for {symbols.length} watchlist symbol
           {symbols.length === 1 ? "" : "s"}. This is a research and risk review
           output only — not a trading signal or financial advice.
         </p>
@@ -141,6 +165,17 @@ export default function DemoResultClient() {
         <div className="bg-amber-950 border border-amber-800 rounded-2xl p-6">
           <p className="text-amber-300 text-sm mb-2">Risk mode</p>
           <p className="text-xl font-bold text-amber-100">{caution}</p>
+        </div>
+      </section>
+
+      <section className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-8 mb-10">
+        <h2 className="text-3xl font-bold mb-4">Elexa review</h2>
+        <div className="space-y-5 text-[var(--muted)] text-sm leading-relaxed">
+          <p><strong className="text-white">Verdict:</strong> {review.verdict}</p>
+          <p><strong className="text-white">Primary symbol view:</strong> {review.primary}</p>
+          <p><strong className="text-white">Watchlist quality:</strong> {review.watchlist}</p>
+          <p><strong className="text-white">Stablecoin and liquidity check:</strong> {review.stablecoin}</p>
+          <p><strong className="text-white">Next research step:</strong> {review.next}</p>
         </div>
       </section>
 
