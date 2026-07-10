@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createAdminSdk } from "@supabase/supabase-js";
 import { withApi } from "@/lib/observability/api-handler";
+import { isSafeWebhookUrl } from "@/lib/url-safety";
 import { NextRequest, NextResponse } from "next/server";
-import { randomUUID } from "crypto";
 
 export interface OutgoingWebhook {
   id: string;
@@ -14,21 +13,8 @@ export interface OutgoingWebhook {
   last_delivery_status: string | null;
 }
 
-function getHooks(user: { user_metadata?: Record<string, unknown> | null }): OutgoingWebhook[] {
-  const arr = user.user_metadata?.outgoing_webhooks;
-  return Array.isArray(arr) ? (arr as OutgoingWebhook[]) : [];
-}
-
-async function saveHooks(userId: string, existingMeta: Record<string, unknown>, hooks: OutgoingWebhook[]) {
-  const admin = createAdminSdk(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
-  await admin.auth.admin.updateUserById(userId, {
-    user_metadata: { ...existingMeta, outgoing_webhooks: hooks },
-  });
-}
+// RLS on outgoing_webhooks scopes every operation to the caller's own rows
+// (see migration 008) — no service-role client needed for this route.
 
 export const GET = withApi(async function GET() {
   const supabase = await createClient();
@@ -38,7 +24,12 @@ export const GET = withApi(async function GET() {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json({ hooks: getHooks(user) });
+  const { data } = await supabase
+    .from("outgoing_webhooks")
+    .select("id, label, url, events, created_at, last_delivery_at, last_delivery_status")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+  return NextResponse.json({ hooks: data ?? [] });
 });
 
 export const POST = withApi(async function POST(request: NextRequest) {
@@ -53,9 +44,12 @@ export const POST = withApi(async function POST(request: NextRequest) {
   if (!body || typeof body.url !== "string" || !body.url.startsWith("http")) {
     return NextResponse.json({ error: "Valid URL required" }, { status: 400 });
   }
-  // Restrict to Discord + Slack + generic HTTPS
-  if (!/^https:\/\//.test(body.url)) {
-    return NextResponse.json({ error: "HTTPS required" }, { status: 400 });
+  // Restrict to Discord + Slack + generic HTTPS, and block internal/private
+  // network destinations (SSRF: this URL gets fetched server-side on every
+  // matching trade/agent event).
+  const safety = await isSafeWebhookUrl(body.url);
+  if (!safety.safe) {
+    return NextResponse.json({ error: safety.reason ?? "URL not allowed" }, { status: 400 });
   }
   const label = String(body.label ?? "").slice(0, 50).trim() || "Untitled";
   const events = Array.isArray(body.events) ? body.events : ["trade.filled"];
@@ -65,22 +59,23 @@ export const POST = withApi(async function POST(request: NextRequest) {
     return NextResponse.json({ error: "At least one event" }, { status: 422 });
   }
 
-  const current = getHooks(user);
-  if (current.length >= 5) {
+  const { count } = await supabase
+    .from("outgoing_webhooks")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
+  if ((count ?? 0) >= 5) {
     return NextResponse.json({ error: "Webhook limit reached (5)" }, { status: 422 });
   }
 
-  const hook: OutgoingWebhook = {
-    id: randomUUID(),
-    label,
-    url: body.url,
-    events: filtered,
-    created_at: new Date().toISOString(),
-    last_delivery_at: null,
-    last_delivery_status: null,
-  };
-  const next = [...current, hook];
-  await saveHooks(user.id, user.user_metadata ?? {}, next);
+  const { data: hook, error } = await supabase
+    .from("outgoing_webhooks")
+    .insert({ user_id: user.id, label, url: body.url, events: filtered })
+    .select("id, label, url, events, created_at, last_delivery_at, last_delivery_status")
+    .single();
+
+  if (error || !hook) {
+    return NextResponse.json({ error: error?.message ?? "Failed to save webhook" }, { status: 500 });
+  }
   return NextResponse.json({ hook });
 });
 
@@ -94,8 +89,6 @@ export const DELETE = withApi(async function DELETE(request: NextRequest) {
   }
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-  const current = getHooks(user);
-  const next = current.filter((h) => h.id !== id);
-  await saveHooks(user.id, user.user_metadata ?? {}, next);
+  await supabase.from("outgoing_webhooks").delete().eq("id", id).eq("user_id", user.id);
   return NextResponse.json({ ok: true });
 });

@@ -1,12 +1,43 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/client-ip";
 
 /**
  * Admin setup endpoint — sets a user's password and confirms their email.
  * Requires the SUPABASE_SERVICE_ROLE_KEY to be supplied in the form.
- * One-time bootstrap tool. Should be removed or env-gated for production.
+ *
+ * One-time bootstrap tool, disabled by default. Set ADMIN_SETUP_ENABLED=true
+ * to turn it on temporarily, then unset it once the account is created —
+ * leaving it on is a standing account-takeover path for anyone who ever
+ * obtains the service role key.
  */
+function safeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  // timingSafeEqual throws on length mismatch — pad to equal length first so
+  // a wrong-length guess doesn't short-circuit before the timing-safe check.
+  if (bufA.length !== bufB.length) {
+    timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
+}
+
 export async function POST(request: NextRequest) {
+  if (process.env.ADMIN_SETUP_ENABLED !== "true") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const ip = getClientIp(request);
+  const rl = await checkRateLimit({ key: `admin-setup:${ip}`, ...RATE_LIMITS.auth });
+  if (!rl.allowed) {
+    return NextResponse.redirect(
+      new URL("/admin/setup?error=Too%20many%20attempts.%20Try%20again%20shortly.", request.url)
+    );
+  }
+
   const formData = await request.formData();
   const serviceKey = formData.get("serviceKey") as string;
   const email = formData.get("email") as string;
@@ -24,8 +55,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Verify the supplied service key matches the env var (prevents misuse)
-  if (serviceKey !== process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  // Verify the supplied service key matches the env var (prevents misuse).
+  // Constant-time compare — this is a secret-equality check reachable
+  // pre-auth, so a naive !== is a (minor but free-to-fix) timing side channel.
+  const expectedKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+  if (!expectedKey || !safeCompare(serviceKey, expectedKey)) {
     return NextResponse.redirect(
       new URL(
         "/admin/setup?error=Service%20key%20does%20not%20match.%20Copy%20it%20exactly%20from%20Vercel.",

@@ -12,7 +12,7 @@ export const POST = withApi(async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const customerId = user.user_metadata?.stripe_customer_id as
+  const customerId = user.app_metadata?.stripe_customer_id as
     | string
     | undefined;
   if (!customerId) {

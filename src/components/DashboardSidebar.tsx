@@ -14,6 +14,7 @@ const groups: NavGroup[] = [
     items: [
       { href: "/dashboard", label: "Overview", icon: "📊" },
       { href: "/dashboard/portfolio", label: "Portfolio", icon: "💼" },
+      { href: "/dashboard/live-trading", label: "Live Trading", icon: "⚡" },
       { href: "/dashboard/account", label: "Alpaca Account", icon: "🏦" },
       { href: "/dashboard/position-treemap", label: "Position Treemap", icon: "🗺️" },
       { href: "/dashboard/watchlist", label: "Watchlist", icon: "👀" },

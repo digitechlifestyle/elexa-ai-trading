@@ -1,22 +1,46 @@
 import { createClient } from "@/lib/supabase/server";
-import { createExchange } from "@/lib/exchanges/factory";
-import type { ExchangeName } from "@/lib/exchanges/factory";
+import { createClient as createAdminSdk } from "@supabase/supabase-js";
+import { AlpacaExchange } from "@/lib/exchanges/alpaca";
 import {
   validateOrder,
   checkDailyLoss,
   checkOpenPositions,
   isValidSymbolFormat,
+  isLiveTradingEnabled,
 } from "@/lib/trading/risk-limits";
 import { getRiskLimitsForUser } from "@/lib/trading/user-limits";
+import { getBrokerConnection } from "@/lib/trading/broker-connections";
+import { DISCLAIMER_VERSION } from "@/app/api/live-trading/consent/route";
 import { withApi } from "@/lib/observability/api-handler";
 import { log } from "@/lib/observability/logger";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { deliverWebhook } from "@/lib/webhook-deliver";
 import { NextRequest, NextResponse } from "next/server";
 
-export const POST = withApi(async function POST(request: NextRequest, { requestId }) {
-  const supabase = await createClient();
+const ALPACA_LIVE_URL = "https://api.alpaca.markets";
 
+/**
+ * Places REAL orders against a user's OWN connected brokerage account with
+ * REAL money. Three independent gates, all required:
+ *
+ *   1. LIVE_TRADING_ENABLED=true at the platform level (whole-app kill switch —
+ *      stays false until the compliance items in LAUNCH-CHECKLIST.md are done).
+ *   2. The user has accepted the current live-trading risk disclaimer.
+ *   3. The user has connected their own Alpaca live account — orders execute
+ *      against THEIR credentials/THEIR capital, never a platform-shared account.
+ *
+ * Only Alpaca is wired for real execution. The Kraken adapter is a simulator
+ * by design (see exchanges/kraken.ts) and is not accepted here.
+ */
+export const POST = withApi(async function POST(request: NextRequest, { requestId }) {
+  if (!isLiveTradingEnabled()) {
+    return NextResponse.json(
+      { error: "Live trading is not enabled on this platform.", code: "LIVE_TRADING_DISABLED" },
+      { status: 403 }
+    );
+  }
+
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -24,14 +48,9 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Resolve user-specific risk limits (or defaults)
   const limits = getRiskLimitsForUser(user);
 
-  // Rate limit: 10 trades per minute per user
-  const rl = await checkRateLimit({
-    key: `trading:${user.id}`,
-    ...RATE_LIMITS.trading,
-  });
+  const rl = await checkRateLimit({ key: `live-trading:${user.id}`, ...RATE_LIMITS.trading });
   if (!rl.allowed) {
     return NextResponse.json(
       {
@@ -47,62 +66,34 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     !body ||
     typeof body.symbol !== "string" ||
     typeof body.qty !== "number" ||
-    !["buy", "sell"].includes(body.side) ||
-    !body.exchange ||
-    typeof body.exchange !== "string"
+    !["buy", "sell"].includes(body.side)
   ) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
+  if (body.exchange !== "alpaca") {
+    return NextResponse.json(
+      { error: "Live trading currently supports only Alpaca.", code: "EXCHANGE_UNSUPPORTED" },
+      { status: 400 }
+    );
+  }
 
-  // Server-side enforcement: this route is paper-only.
-  // Ignore any client-supplied "live" flag — paper-only is hardcoded below
-  // (is_paper: true) and the route name is /trading/paper.
-
-  const { symbol, qty, side, exchange } = body as {
-    symbol: string;
-    qty: number;
-    side: "buy" | "sell";
-    exchange: ExchangeName;
-  };
-
-  // Optional advanced order fields
+  const { symbol, qty, side } = body as { symbol: string; qty: number; side: "buy" | "sell" };
   const orderType = (body.order_type as string | undefined) ?? "market";
-  const limitPrice =
-    typeof body.limit_price === "number" ? body.limit_price : undefined;
-  const stopPrice =
-    typeof body.stop_price === "number" ? body.stop_price : undefined;
+  const limitPrice = typeof body.limit_price === "number" ? body.limit_price : undefined;
+  const stopPrice = typeof body.stop_price === "number" ? body.stop_price : undefined;
   const validOrderTypes = ["market", "limit", "stop", "stop_limit"];
   if (!validOrderTypes.includes(orderType)) {
-    return NextResponse.json(
-      { error: `Invalid order_type: ${orderType}` },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: `Invalid order_type: ${orderType}` }, { status: 400 });
   }
   if ((orderType === "limit" || orderType === "stop_limit") && limitPrice == null) {
-    return NextResponse.json(
-      { error: "limit_price required for limit/stop_limit order" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "limit_price required" }, { status: 400 });
   }
   if ((orderType === "stop" || orderType === "stop_limit") && stopPrice == null) {
-    return NextResponse.json(
-      { error: "stop_price required for stop/stop_limit order" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "stop_price required" }, { status: 400 });
   }
-
-  // Pre-validate inputs before hitting any external services.
-  // (Full validation runs again after price fetch — this is the cheap pre-check.)
   if (!Number.isFinite(qty) || qty <= 0 || qty > 1_000_000) {
-    return NextResponse.json(
-      { error: "Invalid quantity" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid quantity" }, { status: 400 });
   }
-  // Symbol format must be checked before it's sent to the exchange's price
-  // API — the full check in validateOrder() below only runs after that
-  // fetch, which meant an unvalidated symbol was reaching the exchange
-  // request path first.
   if (!isValidSymbolFormat(symbol)) {
     return NextResponse.json(
       { error: "Invalid symbol format", code: "SYMBOL_INVALID" },
@@ -110,15 +101,48 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     );
   }
 
-  // Open position check
-  const { count: openCount } = await supabase
+  // Gate: current disclaimer accepted
+  const { data: consent } = await supabase
+    .from("live_trading_consents")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("disclaimer_version", DISCLAIMER_VERSION)
+    .limit(1)
+    .maybeSingle();
+  if (!consent) {
+    return NextResponse.json(
+      {
+        error: "You must accept the current live-trading risk disclaimer first.",
+        code: "CONSENT_REQUIRED",
+      },
+      { status: 403 }
+    );
+  }
+
+  // Gate: user has connected their own live Alpaca account
+  const admin = createAdminSdk(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+  const credentials = await getBrokerConnection(admin, user.id, "alpaca");
+  if (!credentials) {
+    return NextResponse.json(
+      {
+        error: "Connect your Alpaca live account before placing live trades.",
+        code: "BROKER_NOT_CONNECTED",
+      },
+      { status: 400 }
+    );
+  }
+
+  const openCheck = await supabase
     .from("trades")
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
     .eq("status", "filled")
-    .eq("is_paper", true);
-
-  const positionsCheck = checkOpenPositions(openCount ?? 0, limits);
+    .eq("is_paper", false);
+  const positionsCheck = checkOpenPositions(openCheck.count ?? 0, limits);
   if (!positionsCheck.allowed) {
     return NextResponse.json(
       { error: positionsCheck.reason, code: positionsCheck.code },
@@ -126,85 +150,53 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     );
   }
 
-  // Check daily loss limit
   const today = new Date().toISOString().split("T")[0];
   const { data: todayTrades } = await supabase
     .from("trades")
     .select("filled_price, qty, side")
     .eq("user_id", user.id)
     .eq("status", "filled")
+    .eq("is_paper", false)
     .gte("created_at", `${today}T00:00:00.000Z`);
-
   const dailyPnl = (todayTrades ?? []).reduce((acc, t) => {
     const val = (t.filled_price ?? 0) * t.qty;
     return acc + (t.side === "sell" ? val : -val);
   }, 0);
-
   const lossCheck = checkDailyLoss(dailyPnl, limits);
   if (!lossCheck.allowed) {
-    return NextResponse.json(
-      { error: lossCheck.reason, code: lossCheck.code },
-      { status: 429 }
-    );
+    return NextResponse.json({ error: lossCheck.reason, code: lossCheck.code }, { status: 429 });
   }
 
-  // Create exchange adapter
-  let exchangeAdapter;
-  try {
-    // Per-exchange config. Kraken paper adapter needs no credentials.
-    const config =
-      exchange === "kraken"
-        ? {
-            name: exchange,
-            api_key: "",
-            api_secret: "",
-            base_url: "https://api.kraken.com",
-          }
-        : {
-            name: exchange,
-            api_key: process.env.ALPACA_API_KEY || "",
-            api_secret: process.env.ALPACA_API_SECRET || "",
-            base_url:
-              process.env.ALPACA_BASE_URL ||
-              "https://paper-api.alpaca.markets",
-          };
-    exchangeAdapter = createExchange(exchange, config);
-  } catch (err) {
-    return NextResponse.json(
-      { error: `Unknown exchange: ${exchange}` },
-      { status: 400 }
-    );
-  }
+  const exchangeAdapter = new AlpacaExchange({
+    name: "alpaca",
+    api_key: credentials.apiKey,
+    api_secret: credentials.apiSecret,
+    base_url: ALPACA_LIVE_URL,
+  });
 
-  // Validate exchange credentials
   const isValid = await exchangeAdapter.validateCredentials().catch(() => false);
   if (!isValid) {
     return NextResponse.json(
-      { error: `Could not authenticate with ${exchange}. Check API keys.` },
+      { error: "Could not authenticate with your connected Alpaca account." },
       { status: 401 }
     );
   }
 
-  // Get current price. If exchange has no quote for this symbol, the user
-  // typed something invalid → 422 (unprocessable). Anything else (network,
-  // outage) → 502.
   let estimatedPrice = 0;
   try {
     estimatedPrice = await exchangeAdapter.getAssetPrice(symbol);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "";
-    const userInputError =
-      /not found|invalid|no price data|no data|404|400/i.test(msg);
+    const userInputError = /not found|invalid|no price data|no data|404|400/i.test(msg);
     return NextResponse.json(
       {
-        error: `Could not fetch price for ${symbol} on ${exchange}`,
+        error: `Could not fetch price for ${symbol}`,
         code: userInputError ? "SYMBOL_INVALID" : "PRICE_FETCH_FAILED",
       },
       { status: userInputError ? 422 : 502 }
     );
   }
 
-  // Validate order against risk limits (full validation with real price)
   const validation = validateOrder(symbol, qty, estimatedPrice, limits);
   if (!validation.valid) {
     return NextResponse.json(
@@ -213,7 +205,6 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     );
   }
 
-  // Place paper order
   let order;
   try {
     order = await exchangeAdapter.placeOrder(symbol, qty, side, {
@@ -223,11 +214,9 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Order failed";
+    log.error("live_trade.order_failed", { request_id: requestId, user_id: user.id, message: msg });
     return NextResponse.json({ error: msg }, { status: 502 });
   }
-
-  // Log to database (status already normalized by exchange adapter)
-  const mappedStatus = order.status;
 
   const { data: trade, error: dbError } = await supabase
     .from("trades")
@@ -237,48 +226,47 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
       side,
       qty,
       filled_price: order.filled_price,
-      status: mappedStatus,
-      is_paper: true,
+      status: order.status,
+      is_paper: false,
       alpaca_order_id: order.id,
     })
     .select()
     .single();
 
   if (dbError) {
-    log.error("trade.insert_failed", {
+    log.error("live_trade.insert_failed", {
       request_id: requestId,
       user_id: user.id,
       message: dbError.message,
     });
     return NextResponse.json(
-      { error: `Failed to log trade: ${dbError.message}` },
+      { error: `Order placed but failed to log trade: ${dbError.message}` },
       { status: 500 }
     );
   }
 
-  log.info("trade.placed", {
+  log.info("live_trade.placed", {
     request_id: requestId,
     user_id: user.id,
     symbol,
     side,
     qty,
-    exchange,
   });
 
-  // Fire outgoing webhooks (fire-and-forget)
   const { data: hooks } = await supabase
     .from("outgoing_webhooks")
     .select("id, label, url, events, created_at, last_delivery_at, last_delivery_status")
     .eq("user_id", user.id);
   if (hooks && hooks.length > 0) {
-    const event = mappedStatus === "filled" ? "trade.filled" : "trade.submitted";
+    const event = order.status === "filled" ? "trade.filled" : "trade.submitted";
     deliverWebhook(hooks, event, {
       symbol: symbol.toUpperCase(),
       side,
       qty,
-      status: mappedStatus,
+      status: order.status,
       filled_price: order.filled_price,
-      exchange,
+      exchange: "alpaca",
+      is_paper: false,
       trade_id: trade.id,
     });
   }

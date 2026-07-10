@@ -202,7 +202,7 @@ Default Supabase email is rate-limited (3 emails/hour). Configure custom SMTP:
 3. Create products + prices for each plan (Researcher $29, Pro $99, Team $499)
 4. Copy price IDs to `/src/lib/billing/plans.ts`
 5. Create webhook endpoint:
-   - URL: `https://elexaaitrading.com/api/stripe/webhook`
+   - URL: `https://elexaaitrading.com/api/billing/webhook`
    - Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
 6. Copy webhook secret to `STRIPE_WEBHOOK_SECRET` env var
 7. Test with Stripe test card `4242 4242 4242 4242`

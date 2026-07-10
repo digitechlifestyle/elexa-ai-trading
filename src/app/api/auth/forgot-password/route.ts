@@ -1,7 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/client-ip";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const rl = await checkRateLimit({ key: `auth-forgot:${ip}`, ...RATE_LIMITS.auth });
+  if (!rl.allowed) {
+    // Same generic message either way — don't let the rate-limit branch
+    // itself become an email-enumeration or "is rate limiting on" signal.
+    return NextResponse.redirect(
+      new URL(
+        "/forgot-password?message=If%20that%20email%20exists%2C%20a%20reset%20link%20has%20been%20sent",
+        request.url
+      )
+    );
+  }
+
   const formData = await request.formData();
   const email = formData.get("email") as string;
 
