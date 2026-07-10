@@ -45,9 +45,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Set theme before paint to avoid flash */}
+        {/* Set theme before paint to avoid flash. This inline script mutates
+            data-theme on <html> before React hydrates, which is exactly the
+            attribute React's server-rendered markup doesn't have — hence
+            suppressHydrationWarning above. Standard dark-mode pattern (same
+            approach next-themes uses), not a real mismatch. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `try{var t=localStorage.getItem('elexa_theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}`,

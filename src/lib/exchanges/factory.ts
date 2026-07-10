@@ -2,13 +2,15 @@ import type { IExchange, ExchangeConfig } from "./types";
 import { AlpacaExchange } from "./alpaca";
 import { KrakenExchange } from "./kraken";
 
-export type ExchangeName = "alpaca" | "kraken" | "coinbase" | "binance";
+// Only list exchanges with a real IExchange implementation below — this
+// type/map directly drives the exchange picker in the trading UI, so an
+// entry here with no case in createExchange() is a selectable option that
+// always fails with "Unknown exchange" on submit.
+export type ExchangeName = "alpaca" | "kraken";
 
 const EXCHANGES: { [key in ExchangeName]: { name: string; assets: string[] } } = {
   alpaca: { name: "Alpaca (real paper API)", assets: ["stocks, ETFs, commodities (GLD, SLV, USO)", "crypto (BTC, ETH, XRP, SOL, DOGE, PEPE, SHIB...)"] },
   kraken: { name: "Kraken (simulated)", assets: ["extended crypto (HBAR, XLM, DAI, ATOM, ALGO, ICP, NEAR, KAVA)"] },
-  coinbase: { name: "Coinbase", assets: ["crypto"] },
-  binance: { name: "Binance", assets: ["crypto", "futures"] },
 };
 
 export function createExchange(name: ExchangeName, config: ExchangeConfig): IExchange {
@@ -17,10 +19,6 @@ export function createExchange(name: ExchangeName, config: ExchangeConfig): IExc
       return new AlpacaExchange(config);
     case "kraken":
       return new KrakenExchange(config);
-    // case "coinbase":
-    //   return new CoinbaseExchange(config);
-    // case "binance":
-    //   return new BinanceExchange(config);
     default:
       throw new Error(`Unknown exchange: ${name}`);
   }

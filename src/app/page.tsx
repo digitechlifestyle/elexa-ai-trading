@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import InteractiveAgents from "@/components/InteractiveAgents";
 import { features as featureData } from "@/lib/features-data";
@@ -10,39 +9,6 @@ export const metadata: Metadata = {
   description:
     "Explore AI-assisted paper trading with Elexa. Multi-agent analysis, trade journals, and risk management — all in simulated mode. Not financial advice.",
 };
-
-const features = [
-  {
-    icon: "🤖",
-    title: "6 AI Agents",
-    desc: "CEO, Quant, Risk, Compliance, SEO, and Support agents work together. Each decision is validated and logged.",
-  },
-  {
-    icon: "🪙",
-    title: "Stocks & Crypto",
-    desc: "Trade stocks via Alpaca. Trade crypto (BTC, XRP, SOL, top 100) via Kraken. Coming: Coinbase, Binance.",
-  },
-  {
-    icon: "⚡",
-    title: "Multi-Exchange",
-    desc: "Plug in your own API keys. We route trades to your choice of exchange. You control the connection.",
-  },
-  {
-    icon: "📓",
-    title: "Trade Journal",
-    desc: "Every AI decision is logged with full reasoning. Review agent recommendations and outcomes.",
-  },
-  {
-    icon: "🛡️",
-    title: "Risk Management",
-    desc: "Hard stop-loss limits, max position sizes, daily loss caps. Enforced server-side — no override.",
-  },
-  {
-    icon: "🔐",
-    title: "Encrypted API Keys",
-    desc: "Your exchange credentials are stored encrypted. Full audit log of every trade and AI decision.",
-  },
-];
 
 export default async function HomePage({
   searchParams,

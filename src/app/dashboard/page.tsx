@@ -21,7 +21,10 @@ export default async function DashboardPage() {
     .order("created_at", { ascending: false })
     .limit(3);
 
-  // Streak — pull last 90 days of activity for snappy compute
+  // Streak — pull last 90 days of activity for snappy compute.
+  // async Server Component: runs once per request server-side, not subject
+  // to client render-purity/memoization rules (no hooks available here).
+  // eslint-disable-next-line react-hooks/purity
   const since90 = new Date(Date.now() - 90 * 86400 * 1000).toISOString();
   const [allTrades, allAgents] = await Promise.all([
     supabase

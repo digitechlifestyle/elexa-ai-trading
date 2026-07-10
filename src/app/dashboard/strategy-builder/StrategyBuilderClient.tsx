@@ -100,77 +100,6 @@ export default function StrategyBuilderClient() {
     }
   }
 
-  function RuleEditor({
-    rule,
-    onChange,
-    label,
-  }: {
-    rule: Rule;
-    onChange: (r: Rule) => void;
-    label: string;
-  }) {
-    const isCross = rule.op.startsWith("crosses");
-    return (
-      <div className="bg-[var(--background)] border border-[var(--card-border)] rounded-lg p-3 space-y-2">
-        <p className="text-xs font-semibold text-[var(--muted)]">{label}</p>
-        <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={rule.indicator}
-            onChange={(e) => onChange({ ...rule, indicator: e.target.value })}
-            className="bg-[var(--card)] border border-[var(--card-border)] rounded px-2 py-1 text-sm"
-          >
-            {INDICATORS.map((i) => (
-              <option key={i.id} value={i.id}>
-                {i.label}
-              </option>
-            ))}
-          </select>
-          <select
-            value={rule.op}
-            onChange={(e) => onChange({ ...rule, op: e.target.value })}
-            className="bg-[var(--card)] border border-[var(--card-border)] rounded px-2 py-1 text-sm"
-          >
-            <optgroup label="Value">
-              {OPS_VALUE.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.label}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="Cross">
-              {OPS_CROSS.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.label}
-                </option>
-              ))}
-            </optgroup>
-          </select>
-          {isCross ? (
-            <select
-              value={rule.compare_to}
-              onChange={(e) => onChange({ ...rule, compare_to: e.target.value })}
-              className="bg-[var(--card)] border border-[var(--card-border)] rounded px-2 py-1 text-sm"
-            >
-              {INDICATORS.map((i) => (
-                <option key={i.id} value={i.id}>
-                  {i.label}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <input
-              type="number"
-              step="any"
-              value={rule.value}
-              onChange={(e) => onChange({ ...rule, value: e.target.value })}
-              className="bg-[var(--card)] border border-[var(--card-border)] rounded px-2 py-1 text-sm w-24"
-            />
-          )}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
@@ -268,6 +197,77 @@ export default function StrategyBuilderClient() {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+function RuleEditor({
+  rule,
+  onChange,
+  label,
+}: {
+  rule: Rule;
+  onChange: (r: Rule) => void;
+  label: string;
+}) {
+  const isCross = rule.op.startsWith("crosses");
+  return (
+    <div className="bg-[var(--background)] border border-[var(--card-border)] rounded-lg p-3 space-y-2">
+      <p className="text-xs font-semibold text-[var(--muted)]">{label}</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          value={rule.indicator}
+          onChange={(e) => onChange({ ...rule, indicator: e.target.value })}
+          className="bg-[var(--card)] border border-[var(--card-border)] rounded px-2 py-1 text-sm"
+        >
+          {INDICATORS.map((i) => (
+            <option key={i.id} value={i.id}>
+              {i.label}
+            </option>
+          ))}
+        </select>
+        <select
+          value={rule.op}
+          onChange={(e) => onChange({ ...rule, op: e.target.value })}
+          className="bg-[var(--card)] border border-[var(--card-border)] rounded px-2 py-1 text-sm"
+        >
+          <optgroup label="Value">
+            {OPS_VALUE.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Cross">
+            {OPS_CROSS.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </optgroup>
+        </select>
+        {isCross ? (
+          <select
+            value={rule.compare_to}
+            onChange={(e) => onChange({ ...rule, compare_to: e.target.value })}
+            className="bg-[var(--card)] border border-[var(--card-border)] rounded px-2 py-1 text-sm"
+          >
+            {INDICATORS.map((i) => (
+              <option key={i.id} value={i.id}>
+                {i.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type="number"
+            step="any"
+            value={rule.value}
+            onChange={(e) => onChange({ ...rule, value: e.target.value })}
+            className="bg-[var(--card)] border border-[var(--card-border)] rounded px-2 py-1 text-sm w-24"
+          />
+        )}
+      </div>
     </div>
   );
 }

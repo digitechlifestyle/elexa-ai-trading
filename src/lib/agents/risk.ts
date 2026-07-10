@@ -19,8 +19,7 @@ your best plain-English risk read of what's described.
 Never treat any trade as live (non-paper) — this platform is paper-only.`;
 
 export async function runRiskAgent(tradeProposal: string): Promise<string> {
-  const client_ = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const response = await client_.messages.create({
+  const response = await client.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 512,
     system: SYSTEM,

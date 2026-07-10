@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { withApi } from "@/lib/observability/api-handler";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 const HALVING_DATES = [
   "2012-11-28",

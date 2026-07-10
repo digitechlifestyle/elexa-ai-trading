@@ -3,12 +3,6 @@ import { withApi } from "@/lib/observability/api-handler";
 import { NextRequest, NextResponse } from "next/server";
 import { ema } from "@/lib/indicators";
 
-interface Pivot {
-  idx: number;
-  price: number;
-  macd: number;
-}
-
 interface Divergence {
   type: "bullish_regular" | "bearish_regular" | "bullish_hidden" | "bearish_hidden";
   from: { date: string; price: number; macd: number };

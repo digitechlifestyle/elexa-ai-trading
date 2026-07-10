@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export interface Position {
@@ -66,6 +66,23 @@ export default function PositionsTable({
     }
   }
 
+  const { totalValue, totalCost, totalPnl } = useMemo(() => {
+    let value = 0;
+    let cost = 0;
+    let pnl = 0;
+    for (const p of positions) {
+      const cur = prices[p.symbol];
+      const v = cur != null ? cur * Math.abs(p.qty) : null;
+      const c = Math.abs(p.cost_basis);
+      if (v != null) {
+        value += v;
+        cost += c;
+        pnl += v - c;
+      }
+    }
+    return { totalValue: value, totalCost: cost, totalPnl: pnl };
+  }, [positions, prices]);
+
   if (positions.length === 0) {
     return (
       <p className="text-sm text-[var(--muted)]">
@@ -73,10 +90,6 @@ export default function PositionsTable({
       </p>
     );
   }
-
-  let totalValue = 0;
-  let totalCost = 0;
-  let totalPnl = 0;
 
   return (
     <div className="overflow-x-auto">
@@ -103,11 +116,6 @@ export default function PositionsTable({
             const pnl = value != null ? value - cost : null;
             const pnlPct =
               value != null && cost > 0 ? ((value - cost) / cost) * 100 : null;
-            if (value != null) {
-              totalValue += value;
-              totalCost += cost;
-              totalPnl += pnl ?? 0;
-            }
             return (
               <tr
                 key={p.symbol}

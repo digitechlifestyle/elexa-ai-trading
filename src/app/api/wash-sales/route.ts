@@ -3,8 +3,6 @@ import { withApi } from "@/lib/observability/api-handler";
 import { NextResponse } from "next/server";
 import { matchTrades, RawTrade, ClosedTrade } from "@/lib/trade-analytics";
 
-interface RawTradeWithSide extends RawTrade { /* same shape */ }
-
 interface WashSaleFlag {
   symbol: string;
   loss_exit_time: string;
@@ -34,7 +32,7 @@ export const GET = withApi(async function GET() {
     .eq("user_id", user.id)
     .order("created_at", { ascending: true });
 
-  const trades = (data ?? []) as RawTradeWithSide[];
+  const trades = (data ?? []) as RawTrade[];
   const closed: ClosedTrade[] = matchTrades(trades);
   const losses = closed.filter((c) => c.pnl < 0);
 

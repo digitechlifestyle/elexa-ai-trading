@@ -11,6 +11,16 @@ import { useMemo, useState } from "react";
  * Standard rule of thumb: ATM straddle covers ~85% of one-SD outcomes
  * because it's slightly OTM-distance discounted.
  */
+function Row({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="flex justify-between items-center text-sm py-2 border-b border-[var(--card-border)] last:border-0">
+      <span className="text-[var(--muted)]">{label}</span>
+      <span className="font-mono font-semibold">{value}</span>
+      {hint && <span className="text-xs text-[var(--muted)]">{hint}</span>}
+    </div>
+  );
+}
+
 export default function ImpliedMoveClient() {
   const [price, setPrice] = useState(100);
   const [call, setCall] = useState(3);
@@ -38,14 +48,6 @@ export default function ImpliedMoveClient() {
       lower: price - move,
     };
   }, [iv, days, price]);
-
-  const Row = ({ label, value, hint }: { label: string; value: string; hint?: string }) => (
-    <div className="flex justify-between items-center text-sm py-2 border-b border-[var(--card-border)] last:border-0">
-      <span className="text-[var(--muted)]">{label}</span>
-      <span className="font-mono font-semibold">{value}</span>
-      {hint && <span className="text-xs text-[var(--muted)]">{hint}</span>}
-    </div>
-  );
 
   return (
     <div className="space-y-6 max-w-4xl">

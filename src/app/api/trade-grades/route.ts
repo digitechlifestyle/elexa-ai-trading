@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { withApi } from "@/lib/observability/api-handler";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { matchTrades, RawTrade } from "@/lib/trade-analytics";
 
 interface GradedTrade {

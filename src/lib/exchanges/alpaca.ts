@@ -1,5 +1,39 @@
 import type { IExchange, ExchangeConfig, Account, Order, Position, Asset, AssetType } from "./types";
 
+// Shapes of Alpaca's raw REST responses, limited to the fields this
+// adapter actually reads. Not a full Alpaca API type — just enough to
+// replace `any` with something checked.
+interface AlpacaAccountRaw {
+  id: string;
+  cash: string;
+  buying_power: string;
+  portfolio_value: string;
+  equity: string;
+}
+
+interface AlpacaPositionRaw {
+  symbol: string;
+  qty: string;
+  avg_fill_price: string;
+  current_price: string;
+  unrealized_pl: string;
+}
+
+interface AlpacaAssetRaw {
+  symbol: string;
+  name: string;
+}
+
+interface AlpacaOrderRaw {
+  id: string;
+  symbol: string;
+  qty: string;
+  side: "buy" | "sell";
+  status: string;
+  filled_avg_price: string | null;
+  created_at: string;
+}
+
 // Crypto symbols supported by Alpaca paper-trading (USD pairs).
 // If user types a bare symbol from this list, auto-append "/USD".
 const ALPACA_CRYPTO_SYMBOLS = new Set([
@@ -32,7 +66,7 @@ export class AlpacaExchange implements IExchange {
 
   async validateCredentials(): Promise<boolean> {
     try {
-      const res = await this.request("GET", "/v2/account");
+      const res = await this.request<AlpacaAccountRaw>("GET", "/v2/account");
       return !!res.id;
     } catch {
       return false;
@@ -40,7 +74,7 @@ export class AlpacaExchange implements IExchange {
   }
 
   async getAccount(): Promise<Account> {
-    const data = await this.request("GET", "/v2/account");
+    const data = await this.request<AlpacaAccountRaw>("GET", "/v2/account");
     return {
       cash: parseFloat(data.cash),
       buying_power: parseFloat(data.buying_power),
@@ -50,8 +84,8 @@ export class AlpacaExchange implements IExchange {
   }
 
   async getPositions(): Promise<Position[]> {
-    const data = await this.request("GET", "/v2/positions");
-    return data.map((p: any) => ({
+    const data = await this.request<AlpacaPositionRaw[]>("GET", "/v2/positions");
+    return data.map((p) => ({
       symbol: p.symbol,
       qty: parseFloat(p.qty),
       avg_fill_price: parseFloat(p.avg_fill_price),
@@ -61,10 +95,10 @@ export class AlpacaExchange implements IExchange {
   }
 
   async searchAssets(query: string): Promise<Asset[]> {
-    const data = await this.request("GET", `/v2/assets?status=active&class=us_equity`);
+    const data = await this.request<AlpacaAssetRaw[]>("GET", `/v2/assets?status=active&class=us_equity`);
     return data
-      .filter((a: any) => a.symbol.includes(query.toUpperCase()) || a.name.includes(query))
-      .map((a: any) => ({
+      .filter((a) => a.symbol.includes(query.toUpperCase()) || a.name.includes(query))
+      .map((a) => ({
         symbol: a.symbol,
         name: a.name,
         type: "stock" as AssetType,
@@ -139,7 +173,7 @@ export class AlpacaExchange implements IExchange {
       payload.stop_price = String(opts.stop_price);
     }
 
-    const data = await this.request("POST", "/v2/orders", payload);
+    const data = await this.request<AlpacaOrderRaw>("POST", "/v2/orders", payload);
 
     return {
       id: data.id,
@@ -154,8 +188,8 @@ export class AlpacaExchange implements IExchange {
 
   async getOrders(status?: string): Promise<Order[]> {
     const query = status ? `?status=${status}` : "?status=all";
-    const data = await this.request("GET", `/v2/orders${query}`);
-    return data.map((o: any) => ({
+    const data = await this.request<AlpacaOrderRaw[]>("GET", `/v2/orders${query}`);
+    return data.map((o) => ({
       id: o.id,
       symbol: o.symbol,
       qty: parseFloat(o.qty),
@@ -208,7 +242,7 @@ export class AlpacaExchange implements IExchange {
   }
 
   // Helper
-  private async request(method: string, path: string, body?: any): Promise<any> {
+  private async request<T>(method: string, path: string, body?: Record<string, unknown>): Promise<T> {
     const url = `${this.config.base_url}${path}`;
     const options: RequestInit = {
       method,
@@ -225,10 +259,10 @@ export class AlpacaExchange implements IExchange {
 
     const res = await fetch(url, options);
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
+      const err: { message?: string } = await res.json().catch(() => ({}));
       throw new Error(`Alpaca error: ${err.message ?? res.statusText}`);
     }
 
-    return res.json();
+    return res.json() as Promise<T>;
   }
 }
