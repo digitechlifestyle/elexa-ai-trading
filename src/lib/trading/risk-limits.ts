@@ -10,6 +10,15 @@ export const DEFAULT_RISK_LIMITS: RiskLimits = {
 // Symbols: alphanumeric, dot, dash, slash. Up to 12 chars (covers BTC/USD, BRK.B, etc.)
 const SYMBOL_PATTERN = /^[A-Z0-9./-]{1,12}$/;
 
+/**
+ * Cheap format check callers can run before sending a symbol to an external
+ * exchange API — validateOrder() also checks this, but only after a price
+ * has already been fetched using the raw symbol.
+ */
+export function isValidSymbolFormat(symbol: string): boolean {
+  return typeof symbol === "string" && SYMBOL_PATTERN.test(symbol.toUpperCase());
+}
+
 const MAX_REASONABLE_PRICE = 10_000_000; // safety against absurd prices
 const MAX_REASONABLE_QTY = 1_000_000;
 

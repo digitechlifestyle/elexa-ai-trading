@@ -94,7 +94,7 @@ export class AlpacaExchange implements IExchange {
     }
 
     // Stock data
-    const url = `https://data.alpaca.markets/v2/stocks/${sym}/trades/latest`;
+    const url = `https://data.alpaca.markets/v2/stocks/${encodeURIComponent(sym)}/trades/latest`;
     const res = await fetch(url, {
       headers: {
         "APCA-API-KEY-ID": this.config.api_key,

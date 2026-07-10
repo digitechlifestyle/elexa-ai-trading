@@ -5,11 +5,18 @@ import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 
 /**
- * Stripe webhook — keeps user.user_metadata in sync with subscription state.
+ * Stripe webhook — keeps user.app_metadata in sync with subscription state.
  * Listens for: checkout.session.completed, customer.subscription.{created,updated,deleted}.
  * Configure endpoint in Stripe dashboard:
  *   URL: https://elexa-ai-trading.vercel.app/api/billing/webhook
  *   Events: checkout.session.completed, customer.subscription.*
+ *
+ * Deliberately app_metadata, not user_metadata: user_metadata is writable by
+ * the user themselves via the client SDK (supabase.auth.updateUser()), so
+ * plan/subscription_status lived at "call updateUser() from the browser
+ * console and grant yourself the Team plan for free." app_metadata can only
+ * be written with the service-role key, which only this webhook and the
+ * checkout route hold.
  */
 export async function POST(request: NextRequest) {
   const sig = request.headers.get("stripe-signature");
@@ -54,10 +61,10 @@ export async function POST(request: NextRequest) {
 
     // Read existing metadata so we don't clobber unrelated fields
     const { data } = await admin.auth.admin.getUserById(uid);
-    const existing = data?.user?.user_metadata ?? {};
+    const existing = data?.user?.app_metadata ?? {};
 
     await admin.auth.admin.updateUserById(uid, {
-      user_metadata: {
+      app_metadata: {
         ...existing,
         plan: planRaw,
         subscription_status: status,

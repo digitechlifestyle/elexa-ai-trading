@@ -120,15 +120,21 @@ export const PLANS: Record<PlanTier, PlanDef> = {
 };
 
 interface UserLike {
-  user_metadata?: Record<string, unknown> | null;
+  app_metadata?: Record<string, unknown> | null;
 }
 
 /**
  * Resolve the effective plan for a user.
  * Order of precedence:
  *   1. Profile role = owner/admin → "owner" plan (unlimited bypass)
- *   2. user_metadata.plan (set by Stripe webhook on subscription update)
+ *   2. app_metadata.plan (set by Stripe webhook on subscription update)
  *   3. Default "free"
+ *
+ * Reads app_metadata, not user_metadata: user_metadata can be edited by the
+ * user themselves via the client SDK (supabase.auth.updateUser()), which
+ * would make every paid plan a free self-service upgrade. app_metadata is
+ * only writable with the service-role key (billing webhook + checkout
+ * route), so it's the only place billing state can live safely.
  */
 export function getPlanForUser(
   user: UserLike,
@@ -137,9 +143,9 @@ export function getPlanForUser(
   if (profileRole === "owner" || profileRole === "admin") {
     return PLANS.owner;
   }
-  const planId = user.user_metadata?.plan as PlanTier | undefined;
+  const planId = user.app_metadata?.plan as PlanTier | undefined;
   if (planId && PLANS[planId]) {
-    const status = user.user_metadata?.subscription_status as string | undefined;
+    const status = user.app_metadata?.subscription_status as string | undefined;
     if (status === "active" || status === "trialing") {
       return PLANS[planId];
     }

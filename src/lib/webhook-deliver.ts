@@ -1,4 +1,6 @@
 import type { OutgoingWebhook } from "@/app/api/webhooks/route";
+import { isSafeWebhookUrl } from "@/lib/url-safety";
+import { createClient as createAdminSdk } from "@supabase/supabase-js";
 
 /**
  * Deliver a webhook event to user's configured outgoing webhooks.
@@ -19,11 +21,38 @@ export function deliverWebhook(
   }
 }
 
+function adminClient() {
+  return createAdminSdk(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
+
+async function recordDelivery(hookId: string, status: string): Promise<void> {
+  await adminClient()
+    .from("outgoing_webhooks")
+    .update({ last_delivery_at: new Date().toISOString(), last_delivery_status: status })
+    .eq("id", hookId)
+    .then(
+      () => {},
+      () => {}
+    );
+}
+
 async function deliverOne(
   hook: OutgoingWebhook,
   event: string,
   payload: Record<string, unknown>
 ): Promise<void> {
+  // Re-check at delivery time, not just at registration time — DNS can
+  // change what a hostname resolves to between the two.
+  const safety = await isSafeWebhookUrl(hook.url);
+  if (!safety.safe) {
+    await recordDelivery(hook.id, "blocked");
+    return;
+  }
+
   const isDiscord = /discord(app)?\.com\/api\/webhooks/.test(hook.url);
   const isSlack = /hooks\.slack\.com/.test(hook.url);
 
@@ -48,9 +77,18 @@ async function deliverOne(
     body = { event, payload, timestamp: new Date().toISOString() };
   }
 
-  await fetch(hook.url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let status: string;
+  try {
+    const res = await fetch(hook.url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    status = res.ok ? "success" : `http_${res.status}`;
+  } catch {
+    status = "error";
+    throw new Error(`Webhook delivery failed for hook ${hook.id}`);
+  } finally {
+    await recordDelivery(hook.id, status!);
+  }
 }

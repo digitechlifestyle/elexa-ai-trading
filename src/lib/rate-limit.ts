@@ -19,6 +19,11 @@ export interface RateLimitResult {
 /**
  * Sliding-window rate limiter backed by Postgres.
  *
+ * The count-check and the insert happen in one Postgres function
+ * (check_and_increment_rate_limit, see migration 006) guarded by an advisory
+ * lock keyed on the bucket, so concurrent requests for the same bucket can't
+ * both read "under limit" before either records itself.
+ *
  * For low-traffic apps this is fine. For high-traffic, swap in Upstash Redis
  * with the same interface — only the implementation needs to change.
  */
@@ -27,34 +32,24 @@ export async function checkRateLimit(
   supabase?: SupabaseClient
 ): Promise<RateLimitResult> {
   const client = supabase ?? (await createAdminClient());
-  const cutoff = new Date(Date.now() - config.windowSeconds * 1000);
-
-  // Count events in the window
-  const { count } = await client
-    .from("rate_limit_events")
-    .select("id", { count: "exact", head: true })
-    .eq("bucket_key", config.key)
-    .gte("created_at", cutoff.toISOString());
-
-  const used = count ?? 0;
-  const remaining = Math.max(0, config.limit - used - 1);
   const resetAt = new Date(Date.now() + config.windowSeconds * 1000);
 
-  if (used >= config.limit) {
+  const { data, error } = await client
+    .rpc("check_and_increment_rate_limit", {
+      p_key: config.key,
+      p_limit: config.limit,
+      p_window_seconds: config.windowSeconds,
+    })
+    .single();
+
+  if (error || !data) {
+    // Fail closed: if the rate limiter itself is broken, don't let it become
+    // an open door for the thing it's supposed to be guarding.
     return { allowed: false, remaining: 0, resetAt };
   }
 
-  // Record this request
-  await client
-    .from("rate_limit_events")
-    .insert({ bucket_key: config.key });
-
-  // 0.5% chance to clean up old events (cheap async hygiene)
-  if (Math.random() < 0.005) {
-    await client.rpc("cleanup_old_rate_limit_events");
-  }
-
-  return { allowed: true, remaining, resetAt };
+  const result = data as { allowed: boolean; remaining: number };
+  return { allowed: result.allowed, remaining: result.remaining, resetAt };
 }
 
 /**

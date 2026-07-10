@@ -1,5 +1,5 @@
 import { createClient as createAdminSdk } from "@supabase/supabase-js";
-import { hashApiKey, type ApiKeyRecord } from "./api-keys";
+import { hashApiKey } from "./api-keys";
 
 /**
  * Authenticate an incoming API request via Bearer token.
@@ -7,9 +7,10 @@ import { hashApiKey, type ApiKeyRecord } from "./api-keys";
  *
  * Authorization: Bearer eai_<key>
  *
- * Scans user_metadata.api_keys[] across users until hash matches.
- * For low traffic this is fine. At scale this should be a Postgres table with
- * an index on hash — out of scope for this MVP.
+ * Looks up the key hash in the api_keys table (unique index on hash), so
+ * this is a single indexed query regardless of user count. Previously this
+ * scanned every user's user_metadata.api_keys[] via listUsers() — see
+ * migration 008 for why that was replaced.
  */
 export async function authenticateApiRequest(
   request: Request
@@ -26,24 +27,23 @@ export async function authenticateApiRequest(
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 
-  const { data } = await admin.auth.admin.listUsers({ perPage: 1000 });
-  for (const u of data?.users ?? []) {
-    const keys = (u.user_metadata?.api_keys ?? []) as ApiKeyRecord[];
-    if (!Array.isArray(keys)) continue;
-    const found = keys.find((k) => k.hash === hash);
-    if (found) {
-      // Update last_used_at (fire-and-forget)
-      const next = keys.map((k) =>
-        k.id === found.id ? { ...k, last_used_at: new Date().toISOString() } : k
-      );
-      admin.auth.admin
-        .updateUserById(u.id, {
-          user_metadata: { ...(u.user_metadata ?? {}), api_keys: next },
-        })
-        .catch(() => {});
-      return { userId: u.id, keyId: found.id };
-    }
-  }
+  const { data } = await admin
+    .from("api_keys")
+    .select("id, user_id")
+    .eq("hash", hash)
+    .maybeSingle();
 
-  return null;
+  if (!data) return null;
+
+  // Fire-and-forget — don't make the caller wait on this write.
+  admin
+    .from("api_keys")
+    .update({ last_used_at: new Date().toISOString() })
+    .eq("id", data.id)
+    .then(
+      () => {},
+      () => {}
+    );
+
+  return { userId: data.user_id, keyId: data.id };
 }

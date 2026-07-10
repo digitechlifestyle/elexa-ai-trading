@@ -27,26 +27,32 @@ export const POST = withApi(async function POST(request: NextRequest) {
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
 
-  // Ensure we have a Stripe customer linked to this user
-  let customerId = user.user_metadata?.stripe_customer_id as
-    | string
-    | undefined;
+  // Ensure we have a Stripe customer linked to this user.
+  // app_metadata, not user_metadata — the latter is user-writable via the
+  // client SDK, which would let anyone point their "subscription" at a
+  // Stripe customer of their choosing. See billing/webhook/route.ts.
+  let customerId = user.app_metadata?.stripe_customer_id as string | undefined;
 
   if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: user.email,
-      metadata: { user_id: user.id },
-    });
+    // Idempotency key: a double-click or duplicate request reuses the same
+    // Stripe customer instead of creating an orphaned second one.
+    const customer = await stripe.customers.create(
+      {
+        email: user.email,
+        metadata: { user_id: user.id },
+      },
+      { idempotencyKey: `customer-create-${user.id}` }
+    );
     customerId = customer.id;
-    // Persist on user_metadata via admin client
+    // Persist on app_metadata via admin client
     const admin = createAdminSdk(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
     await admin.auth.admin.updateUserById(user.id, {
-      user_metadata: {
-        ...(user.user_metadata ?? {}),
+      app_metadata: {
+        ...(user.app_metadata ?? {}),
         stripe_customer_id: customerId,
       },
     });
