@@ -1,6 +1,7 @@
 import { createClient as createAdminSdk } from "@supabase/supabase-js";
 import { authenticateApiRequest } from "@/lib/api-auth";
 import { getPlanForUser } from "@/lib/billing/plans";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -12,6 +13,14 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const rl = await checkRateLimit({ key: `v1:${auth.userId}`, ...RATE_LIMITS.api });
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded" },
+      { status: 429, headers: { "retry-after": "60" } }
+      );
+  }
+  
   const admin = createAdminSdk(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
