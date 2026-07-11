@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { authenticateApiRequest } from "@/lib/api-auth";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -10,6 +11,14 @@ export async function GET(request: NextRequest) {
       { status: 401 }
     );
   }
+  const rl = await checkRateLimit({ key: `v1:${auth.userId}`, ...RATE_LIMITS.api });
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded" },
+      { status: 429, headers: { "retry-after": "60" } }
+      );
+  }
+  
   const supabase = await createAdminClient();
   const { data: trades } = await supabase
     .from("trades")
