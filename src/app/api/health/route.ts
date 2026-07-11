@@ -15,7 +15,11 @@ export async function GET(request: Request) {
 
   // Diagnostic mode: ?debug=1 returns extra info to help fix env issues.
   const url = new URL(request.url);
-  const debug = url.searchParams.get("debug") === "1";
+  const authHeader = request.headers.get("authorization");
+    const debug =
+          url.searchParams.get("debug") === "1" &&
+          !!process.env.CRON_SECRET &&
+          authHeader === `Bearer ${process.env.CRON_SECRET}`;
 
   let dbError: string | null = null;
   const envSeen = {
