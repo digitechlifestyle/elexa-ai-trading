@@ -7,6 +7,10 @@ import type { NextRequest } from "next/server";
  * handlers, so this is the practical source.
  */
 export function getClientIp(request: NextRequest): string {
+  const vercelForwardedFor = request.headers.get("x-vercel-forwarded-for");
+  if (vercelForwardedFor) {
+    return vercelForwardedFor.split(",")[0].trim();
+  }
   const forwardedFor = request.headers.get("x-forwarded-for");
   if (forwardedFor) {
     return forwardedFor.split(",")[0].trim();
