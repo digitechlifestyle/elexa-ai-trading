@@ -48,6 +48,23 @@ export const POST = withApi(async function POST(request: NextRequest, { requestI
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Fourth gate, on top of the three above: even with the platform flag on,
+  // live trading is restricted to admin/owner accounts while this is still
+  // in personal-testing-only mode (no legal review / KYC-AML path yet — see
+  // LAUNCH-CHECKLIST.md). Remove this block once that's actually done and
+  // live trading is meant to be available to all users.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "owner"].includes(profile.role)) {
+    return NextResponse.json(
+      { error: "Live trading is limited to admin accounts during testing.", code: "LIVE_TRADING_ADMIN_ONLY" },
+      { status: 403 }
+    );
+  }
+
   const limits = getRiskLimitsForUser(user);
 
   const rl = await checkRateLimit({ key: `live-trading:${user.id}`, ...RATE_LIMITS.trading });
